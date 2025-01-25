@@ -1,8 +1,11 @@
 //  js_compsChanger
 //  copyright Jan Svatuska 2024
-//  240505
+//  240506
 //  v01a    Dimension section reposition 3D layer, but not 2D
-
+//          nefunguje y pokud x = 0, nebo neni zadano
+//  v01b    Condition for dimension: if (inputX.length > 0)
+//          Dimension rozchozeno, lze zadat jen y stranu,
+//          merime delku retezce, (null a undefined nefungovalo)
 
 (function (thisObj) {
     
@@ -171,26 +174,40 @@
         var newDuration = parseFloat(inputDecimalFix).toFixed(2);
         comp.duration = newDuration;
     }
-    function testNum(a) {
+    
+    /* function testNum(a) {
     var result;
     if (a > 0) {
     result = 'positive';
-  } else {
+    } else {
     result = 'NOT positive';
-  }
-  return result;
-}
+    }
+    return result;
+    }*/
 
-    function dimension(comp, inputX, inputY) {
-        if (inputX != "undefined") {
-        var numX = comp.width;
-        }
+    /* function dimension(comp, inputX, inputY) {
+        //var numX = comp.width;
         var numX = parseInt(inputX);
         var numY = parseInt(inputY);
+        if (inputX == "undefined") {
         comp.width = numX;
-        
+        }
+        if (inputY == "undefined") {
         comp.height = numY;
-        
+        }
+    } */
+
+
+    function dimension(comp, inputX, inputY) {
+        //var numX = comp.width;
+        var numX = parseInt(inputX);
+        var numY = parseInt(inputY);
+        if (inputX.length > 0) {
+        comp.width = numX;
+        }
+        if (inputY.length > 0) {
+        comp.height = numY;
+        }
     }
         
     //------------------------------------
