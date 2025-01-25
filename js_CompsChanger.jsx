@@ -7,21 +7,30 @@
 //          Dimension rozchozeno, lze zadat jen y stranu,
 //          merime delku retezce, (null a undefined nefungovalo)
 //  v01d    Pridan ZkracOvator
+//  v01e    Zmena UI - zkracovator do comp panelu
+//          Zkracovator ma nastavenou default hodnotu 1
+//          zahada: pri default hodnote nereaguje na btn, samostatne (v01d) reagoval
+//          reaguje az po nastaveni 0 a pak dalsiho cisla a jeste spatne pocita konec
+//          patrani: funguje pokud btn00 spousti jen triggerCompIn (ostatni funkce vypnute)
+//          nalez: ostatni fce vrati chybu, protoze nemaji osetreny chybejici vstup
 
 (function (thisObj) {
-    
+    //  globals: //
+    var alertStr = "";
+    //==================
+
     newPanel(thisObj);
 
     function newPanel(thisObj) {
 
-        var vers = '01';
-        var title = 'slate0vator (v' + vers + ')';
+        var vers = '01e';
+        var title = 'compChanger_v' + vers + '';
 
         var win = (thisObj instanceof Panel) 
         ? 
         thisObj
         :
-        new Window('palette', 'compChanger', undefined);
+        new Window('palette', title, undefined);
         
         win.orientation = 'column';
         win.alignChildren = 'fill';
@@ -58,29 +67,8 @@
             applyBtn.onClick = function () {
             prejmenovator(txtInputSearch.text, txtInputReplace.text);
             }
-    //  ================panel02a================oo
 
-        var panel02a = win.add('panel', undefined, 'Zkracovator');
-            panel02a.orientation = 'row';
-            panel02a.alignChildren = 'right';
-        //  label
-        var label = panel02a.add('statictext', undefined, 'start: ');
-        //  input text    
-        var startTimeInput = panel02a.add('edittext', undefined, '1', {enterKeySignalsOnChange: false});
-            startTimeInput.characters = 10;
-        //  apply Button
-        var applyBtn = panel02a.add('button', undefined, 'Apply');
-        
-        // --- Action ---
-        function triggerCompIn() {
-            var newIn = startTimeInput.text;
-            compParamChange(zkracovator, newIn);
-        }
-        startTimeInput.onChange = triggerCompIn;
-        applyBtn.onClick = triggerCompIn;
-
-
-    //  ================panel03================oo
+    //  ================panel02================oo
     //  comp dur, width, height, fps
     //  
         //  --------panel02--------fields--------
@@ -91,65 +79,68 @@
             panel02_groupA.orientation = 'column';
             panel02_groupA.alignChildren = 'right';
         var panel02_groupB = panel02.add('group', undefined, 'tlacitka');
-            panel02_groupB.orientation = 'row';
-        var panel02_group_1 = panel02_groupA.add('group', undefined, 'panel02_group_1');
+            panel02_groupB.orientation = 'column';
+        var panel02_group_01 = panel02_groupA.add('group', undefined, 'width');
+            panel02_group_01.orientation = 'row';
+        var panel02_group_0 = panel02_groupA.add('group', undefined, 'width');
+            panel02_group_0.orientation = 'row';
+        var panel02_group_1 = panel02_groupA.add('group', undefined, 'height');
             panel02_group_1.orientation = 'row';
-        var panel02_group_2 = panel02_groupA.add('group', undefined, 'panel02_group_2');
+        var panel02_group_2 = panel02_groupA.add('group', undefined, 'Framerate');
             panel02_group_2.orientation = 'row';
-        var panel02_group_3 = panel02_groupA.add('group', undefined, 'panel02_group_3');
+        var panel02_group_3 = panel02_groupA.add('group', undefined, 'Duration');
             panel02_group_3.orientation = 'row';
-        var panel02_group_4 = panel02_groupB.add('group', undefined, 'panel02_group_4');
-            panel02_group_4.orientation = 'column';
-        
+                
         //  label
-        var labelOne = panel02_group_1.add('statictext', undefined, 'Dimension: ');
+        //var label01 = panel02_group_0.add('statictext', undefined, 'Dimension: ');
+        var label = panel02_group_01.add('statictext', undefined, 'Start: ');
+        var label01a = panel02_group_0.add('statictext', undefined, 'Width: ');
+        var label01b = panel02_group_1.add('statictext', undefined, 'Height: ');
         var labelTwo = panel02_group_2.add('statictext', undefined, 'Framerate: ');
         var labelThree = panel02_group_3.add('statictext', undefined, 'Duration: ');
         //  input text
-        //var inDimensionX = panel02_group_1.add('edittext', undefined, 'TV');
-        var panel02_group_1a = panel02_group_1.add('group', undefined, 'pole dimension');
-            panel02_group_1a.orientation = 'column';
-        var inDimensionX = panel02_group_1a.add('edittext', undefined, undefined, {enterKeySignalsOnChange: false});
+        var inWorkAreaIn = panel02_group_01.add('edittext', undefined, '1', {enterKeySignalsOnChange: false});
+            inWorkAreaIn.characters = 10;
+        var inDimensionX = panel02_group_0.add('edittext', undefined, undefined, {enterKeySignalsOnChange: false});
             inDimensionX.characters = 10;
-        var inDimensionY = panel02_group_1a.add('edittext', undefined, undefined, {enterKeySignalsOnChange: false});
+        var inDimensionY = panel02_group_1.add('edittext', undefined, undefined, {enterKeySignalsOnChange: false});
             inDimensionY.characters = 10;
-        
         var inFps = panel02_group_2.add('edittext', undefined, undefined, {enterKeySignalsOnChange: false});
             inFps.characters = 10;
-        
         var inDuration = panel02_group_3.add('edittext', undefined, undefined, {enterKeySignalsOnChange: false});
             inDuration.characters = 10;
         
         //  apply Button
-        var btn01 = panel02_group_4.add('button', undefined, 'OK');
-            btn01.size = buttonSize;
-        var btn02 = panel02_group_4.add('button', undefined, 'OK');
-            btn02.size = buttonSize;
-        var btn03 = panel02_group_4.add('button', undefined, 'OK');
-            btn03.size = buttonSize;
+        var btn00 = panel02_groupA.add('button', undefined, 'OK');
 
         // --- Action ---
         function triggerDimension() {
-        var newTextInputX = inDimensionX.text;
-        var newTextInputY = inDimensionY.text;
-        compParamChange(dimension, newTextInputX, newTextInputY);
+            var newTextInputX = inDimensionX.text;
+            var newTextInputY = inDimensionY.text;
+            compParamChange(dimension, newTextInputX, newTextInputY);
         }
         function triggerFPS() {
-        var newTextInput = inFps.text;
-        compParamChange(fps, newTextInput);
+            var newTextInput = inFps.text;
+            compParamChange(fps, newTextInput);
         }
         function triggerDur() {
-        var newTextInput = inDuration.text;
-        compParamChange(duration, newTextInput);
+            var newTextInput = inDuration.text;
+            compParamChange(duration, newTextInput);
         }
-
+        function triggerCompIn() {
+            var newIn = inWorkAreaIn.text;
+            compParamChange(zkracovator, newIn);
+        }
+        inWorkAreaIn.onChange = triggerCompIn;
         //inDimensionX.onChange = triggerDimension;
         //inFps.onChange = triggerFPS;
         //inDuration.onChange = triggerDur;
 
-        btn01.onClick = triggerDimension;
-        btn02.onClick = triggerFPS;
-        btn03.onClick = triggerDur;
+        btn00.onClick = triggerCompIn;
+        
+        btn00.onClick = triggerDimension;
+        //btn00.onClick = triggerFPS;
+        //btn00.onClick = triggerDur;
 
     //  ================panel03================oo
 
@@ -170,18 +161,31 @@
         comp.workAreaDuration = compDurFixed - startTimeL;
     }
     
-
     function fps(comp, input) {
+        if (input != "") {
+            if(isNaN(parseFloat(input))) {
+                alertStr = ("Not a number for Width\r");
+                inFps.text = "";    // clear field in case of NaN input
+            } else {
         var inputDecimalFix = input.replace(/,/, ".");
         var newFpsFloat = parseFloat(inputDecimalFix).toFixed(3);
         //var newFpsFixed = newFpsFloat.toFixed(3);
         comp.frameRate = newFpsFloat;
+            }
+        }
     }
 
     function duration(comp, input) {
+        if (input != "") {
+            if(isNaN(parseFloat(input))) {
+                alertStr = ("Not a number for Duration\r");
+                inDuration.text = "";    // clear field in case of NaN input
+            } else {
         var inputDecimalFix = input.replace(/,/, ".");
         var newDuration = parseFloat(inputDecimalFix).toFixed(2);
         comp.duration = newDuration;
+            }
+        }
     }
     
     function dimension(comp, inputX, inputY) {
