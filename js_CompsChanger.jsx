@@ -1,6 +1,6 @@
 //  js_compsChanger
 //  copyright Jan Svatuska 2024
-//  241007
+//  241018
 //  v01a    Dimension section reposition 3D layer, but not 2D
 //          nefunguje y pokud x = 0, nebo neni zadano
 //  v01b    Condition for dimension: if (inputX.length > 0)
@@ -26,8 +26,12 @@
 //          Dimension: priprava na vylepseni - zatim nepouzito, vlozeny 2 funkce:
 //          makeParentLayerOfAllUnparented(), moveParent()
 //  v02h    better description, reorder
+//  v02i    new order - one run. Vubec nefunguje.
 
 //  v02x    vylepsit prejmenovator
+
+//globals://
+var message = "";
 
 (function (thisObj) {
     //  globals: //
@@ -38,7 +42,7 @@
 
     function newPanel(thisObj) {
 
-        var vers = '02h';
+        var vers = '02i';
         var title = 'compChanger_v' + vers + '';
 
         var win = (thisObj instanceof Panel) 
@@ -107,7 +111,7 @@
         function triggerPrejmen() {
             var oldString = txtInputSearch.text;
             var newString = txtInputReplace.text;
-            compParamChange(prejmenOvatorEngine, oldString, newString);
+            compParamChange(prejmenOvator, oldString, newString);
         }
         
     //  ================panel02================oo
@@ -120,9 +124,9 @@
         var panel02_groupA = panel02.add('group', undefined, 'labely a pole');
             panel02_groupA.orientation = 'column';
             panel02_groupA.alignChildren = 'right';
-        var panel02_groupB = panel02.add('group', undefined, 'tlacitka');
-            panel02_groupB.orientation = 'column';
-        var panel02_group_01 = panel02_groupA.add('group', undefined, 'width');
+        // var panel02_groupB = panel02.add('group', undefined, 'tlacitka');
+        //     panel02_groupB.orientation = 'column';
+        var panel02_group_01 = panel02_groupA.add('group', undefined, 'workAreaIn');
             panel02_group_01.orientation = 'row';
         var panel02_group_0 = panel02_groupA.add('group', undefined, 'width');
             panel02_group_0.orientation = 'row';
@@ -135,7 +139,7 @@
                 
         //  label
         //var label01 = panel02_group_0.add('statictext', undefined, 'Dimension: ');
-        var label = panel02_group_01.add('statictext', undefined, 'Start: ');
+        var label = panel02_group_01.add('statictext', undefined, 'WorkAreaIn: ');
         var label01a = panel02_group_0.add('statictext', undefined, 'Width: ');
         var label01b = panel02_group_1.add('statictext', undefined, 'Height: ');
         var labelTwo = panel02_group_2.add('statictext', undefined, 'Framerate: ');
@@ -188,13 +192,14 @@
         //  OK button spousti vsechny funkce
         //  tohle predelat
         btn00.onClick = function () {
-            triggerCompIn();
+            doMain(this.parent);
+            /* triggerCompIn();
             triggerDimension();
             triggerFPS();
-            triggerDur();
+            triggerDur(); */
             };
 
-    //  ================panel02_konec================oo
+        //  ================panel02_konec================oo
 
         // --- ACTIONS ---
         win.onResizing = win.onResize = function () {
@@ -209,7 +214,7 @@
     //------------------------callback------------
         
     //------------------------------------
-    function prejmenOvatorEngine(comp, oldString, newString) {
+    function prejmenOvator(comp, oldString, newString) {
       //for (var index = 0; index < array.length; index++) {
           //var element = array[index]; //  uma item da seleção
           
@@ -221,7 +226,7 @@
           app.project.autoFixExpressions(oldName, newName);
     }
     
-    //  work area IN
+    //  set work area IN  //
     function zkracovator(comp, startTimeL) {
         if (startTimeL != "") {
             if(isNaN(parseFloat(startTimeL))) {
@@ -238,6 +243,36 @@
         }
     }
     
+    function dimension(comp, inputX, inputY) {
+        var numX = parseInt(inputX);
+        var numY = parseInt(inputY);
+        if (inputX.length > 0) {
+        comp.width = numX;
+        }
+        if (inputY.length > 0) {
+        comp.height = numY;
+        }
+    }
+    
+    function width(comp, theDialog) {
+        if (isNaN(parseInt(inputX))) {
+            message = (message + "Not a number value for Width\r");
+            theDialog.inDimensionX.text = ""; //empty field if it is bad so we don't try anymore
+        } else {
+        
+            var oldWidth = comp.width;
+            var newWidth = (parseInt(theDialog.inDimensionX.text));
+            if ( (newWidth > 30000) || (newWidth < 4) ) {
+                message = (message + "Value out of range for Width\r");
+                theDialog.widthT.text = "";//empty field if it is bad so we don't try anymore
+            } else {
+                if (oldWidth != newWidth) {
+                    item.width = newWidth;
+                }
+            }
+        }
+    }
+
     function fps(comp, input) {
         if (input != "") {
             if(isNaN(parseFloat(input))) {
@@ -271,17 +306,6 @@
         pa.position.setValue(newPos);
     }
 
-    
-    function dimension(comp, inputX, inputY) {
-        var numX = parseInt(inputX);
-        var numY = parseInt(inputY);
-        if (inputX.length > 0) {
-        comp.width = numX;
-        }
-        if (inputY.length > 0) {
-        comp.height = numY;
-        }
-    }
     //---------------//----------------
 
 
@@ -362,8 +386,9 @@
     
     //------------------------------------
     //  main starter function calling the looping function changeMulti()
-    function compParamChange(callback, input1, input2) {
-
+    // function compParamChange(callback, input1, input2) {
+    function compParamChange(callback, theDialog) {
+    
     var undoTitle = "Change " + callback.name;
     app.beginUndoGroup(undoTitle);
 
@@ -372,33 +397,34 @@
         if (selection.length == 0) {
             alert("Select a composition");
         } else {
-            changeMulti(selection, callback, input1, input2);
+            // changeMulti(selection, callback, input1, input2);
+            changeMulti(selection, callback, theDialog);
         }
 
     app.endUndoGroup();
     
-
     //------------------------------------
-    //  implementing the particular functions for selected comps
-        function changeMulti(array, callback, input1, input2) {
+        //  implementing the particular functions for selected comps
+        function changeMulti(array, callback, theDialog) {
         for (var index = 0; index < array.length; index++) {
             var element = array[index];
             
-            if (callback !== prejmenOvatorEngine) {
-                if (element instanceof CompItem) {
-
-                callback(element, input1, input2);
-                    }
-                } else {
-                    callback(element, input1, input2);
-                }
+            // if (callback !== prejmenOvator) {
+            //     if (element instanceof CompItem) {  //  zbytek pracuje jen na comps
+                // callback(element, input1, input2);
+                doMain(element, theDialog);
+                //     }
+                // } else {
+                //     callback(element, input1, input2);  // prejmenovator neni omezen
+                // }
             }
         }
     }
     //------------------------------------
-    
-    // app.beginUndoGroup("Change Selected Comps")
-
-
+        function doMain(comp, theDialog) {
+            if (theDialog.inDimensionX.text != "") {
+                width(selection[0], theDialog);
+            }
+        }
 
 })(this);
