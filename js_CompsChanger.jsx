@@ -1,6 +1,6 @@
 //  js_compsChanger
 //  copyright Jan Svatuska 2024
-//  240516
+//  240530
 //  v01a    Dimension section reposition 3D layer, but not 2D
 //          nefunguje y pokud x = 0, nebo neni zadano
 //  v01b    Condition for dimension: if (inputX.length > 0)
@@ -14,6 +14,12 @@
 //          patrani: funguje pokud btn00 spousti jen triggerCompIn (ostatni funkce vypnute)
 //          nalez: ostatni fce vrati chybu, protoze nemaji osetreny chybejici vstup
 //  v02a    reorganizace, zkracovator spatne pocita konec, nic jineho nefunguje
+//  v02b    prejmenovator omezen pouze na comps
+//  v02c    prejmenovator rozsiren na slozky a soubory
+//          Opraveno - Zkracovator zastavoval cinnost na kompozicich kratsich nez 01s
+//          Zkracovator stale spatne pocita konec
+//  v02d    add event listener key "Enter" to 'replace with'
+//          vylepsit prejmenovator
 
 (function (thisObj) {
     //  globals: //
@@ -24,7 +30,7 @@
 
     function newPanel(thisObj) {
 
-        var vers = '02a';
+        var vers = '02c';
         var title = 'compChanger_v' + vers + '';
 
         var win = (thisObj instanceof Panel) 
@@ -190,8 +196,10 @@
             } else {
         var compDur = comp.duration;
         var compDurFixed = compDur.toFixed(0); //round to integer
+        if (compDur > 1) {  //  fix stopping on comps shorter than 01s
         comp.workAreaStart = startTimeL;
         comp.workAreaDuration = compDurFixed - startTimeL;
+                }
             }
         }
     }
@@ -249,21 +257,17 @@
     function layerInspection(comp, newDuration) {
         
         var compLayerArr = comp.layers; // prohlidka vrstev
-        var foundLayersArr = [];
         comp.duration = newDuration;
 
         for (var j = 1; j <= compLayerArr.length; j++) {
             var layerSource = compLayerArr[j].source;
             var layer = compLayerArr[j];
             
-            if (layerSource instanceof CompItem) {  // pokud je vrstva slate jdeme ho hledat
-                //foundLayersArr.push(layerSource.name);
+            if (layerSource instanceof CompItem) {
                 layerSource.duration = newDuration;
             }
                 layer.outPoint = newDuration;
         }
-        //alert(foundLayersArr);
-        //return foundLayersArr;
     }
 
     function levelOrderTraversal(root) {
@@ -323,13 +327,17 @@
         for (var index = 0; index < array.length; index++) {
             var element = array[index];
             
-            if (element instanceof CompItem) {
+            if (callback !== prejmenOvatorEngine) {
+                if (element instanceof CompItem) {
 
                 callback(element, input1, input2);
+                    }
+                } else {
+                    callback(element, input1, input2);
                 }
             }
         }
-    }    
+    }
     //------------------------------------
     
 
