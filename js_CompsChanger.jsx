@@ -1,6 +1,6 @@
 //  js_compsChanger
 //  copyright Jan Svatuska 2024
-//  240531
+//  240603
 //  v01a    Dimension section reposition 3D layer, but not 2D
 //          nefunguje y pokud x = 0, nebo neni zadano
 //  v01b    Condition for dimension: if (inputX.length > 0)
@@ -21,6 +21,8 @@
 //  v02d    Prejmenovator: event listener key "Enter" added to 'replace with'
 //          Zkracovator: Opraven vypocet konce
 //  v02e    vylepsit prejmenovator
+//  v02e    Prejmenovator: event listener key "Enter" added to 'Apply'
+//  v02f    vylepsit prejmenovator
 
 (function (thisObj) {
     //  globals: //
@@ -31,7 +33,7 @@
 
     function newPanel(thisObj) {
 
-        var vers = '02d';
+        var vers = '02e';
         var title = 'compChanger_v' + vers + '';
 
         var win = (thisObj instanceof Panel) 
@@ -69,7 +71,7 @@
             txtInputReplace.characters = 25;
         
         //  apply Button
-        var applyBtn = panel01group02.add('button', undefined, 'Apply');
+        var btnApplyRename = panel01group02.add('button', undefined, 'Apply');
         
         // --- Action ---
         txtInputReplace.addEventListener("keydown", function(kd) {pressed (kd)});
@@ -79,8 +81,20 @@
                 triggerPrejmen();
             }
         }
-        //inDimensionX.onChange = triggerDimension;
-            applyBtn.onClick = function () {
+
+        btnApplyRename.addEventListener("keydown", function(kd) {pressed_02 (kd)});
+        function pressed_02(k) {
+            if (k.keyName === "Enter") {
+                //alert("You pressed " + k.keyName);
+                triggerPrejmen();
+            }
+            /*if (k.keyName === "Tab") {
+                txtInputSearch.active = true;
+                //alert("You pressed " + k.keyName);
+            }*/
+        }
+
+        btnApplyRename.onClick = function () {
             triggerPrejmen();
             }
         function triggerPrejmen() {
