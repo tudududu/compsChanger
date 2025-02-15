@@ -40,14 +40,17 @@ v03x    Prejmenovator: vylepsit (crg)
 
 v03a    Rozchozeno. Dimension: Width, funguje 3D layer, tj. je bez korekce Nullem.
 v03b    Dimension: Zprovozneno pro 2D i 3D layer. Implementaci re-centeringu.
+v03c    Info message zprovoznena.
 
 */
+
+//===========globals
+var vers = '03b';
+var title = 'compsChanger (v' + vers + ')';
+var message = "";
+//==================
+    
 (function (thisObj) {
-    //===========globals
-    var vers = '03b';
-    var title = 'compsChanger (v' + vers + ')';
-    var message = "";
-    //==================
     newPanel(thisObj);
 
     function newPanel(thisObj) {
@@ -125,7 +128,8 @@ v03b    Dimension: Zprovozneno pro 2D i 3D layer. Implementaci re-centeringu.
             } else {
                 if (oldWidth != newWidth) {
                     item.width = newWidth;
-                    message = (message + "Value is OK\r");
+                    // message = (message + "Value is OK\r"); // test messagae
+                    // re-centering: na rozdil od CRG je stale zapnuty
                     // if 'recenter' checkbox is checked:
                     // if (theDialog.reCenterCheck.value) {
                         thisMuch = (-1 * (oldWidth - newWidth)) / 2;
@@ -163,7 +167,7 @@ v03b    Dimension: Zprovozneno pro 2D i 3D layer. Implementaci re-centeringu.
                 } else {
                     if (oldHeight != newHeigh) {
                         item.height = newHeigh;
-                        message = (message + "Value is OK\r");
+                        // message = (message + "Value is OK\r"); // test messagae
                         // if 'recenter' checkbox is checked:
                         // if (theDialog.reCenterCheck.value) {
                             thisMuch = (-1 * (oldHeight - newHeigh)) / 2;
@@ -213,9 +217,9 @@ v03b    Dimension: Zprovozneno pro 2D i 3D layer. Implementaci re-centeringu.
                 if (theDialog.inDimensionY.text != "") {
                     height(element, theDialog);
                     }
-                // if (message != "") {
-                //     alert("The following problems were found (these settings were not changed!):\r" + message);
-                //     }
+                if (message != "") {
+                    alert("The following problems were found (these settings were not changed!):\r" + message);
+                    }
                 }
             // } else {
             //     callback(element, input1, input2);  // prejmenovator neni omezen
