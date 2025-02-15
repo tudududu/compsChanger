@@ -1,7 +1,7 @@
 /*
 js_compsChanger
 copyright Jan Svatuska 2024
-241015
+241210
 v01a    Dimension section reposition 3D layer, but not 2D
         nefunguje y pokud x = 0, nebo neni zadano
 v01b    Condition for dimension: if (inputX.length > 0)
@@ -37,14 +37,14 @@ v03     Uplne predelat podle vzoru Design 02 (crg)
         Ve funci pod nazvem promenne, uvnitr pristupujem k hodnotam 
         napr. takto: theDialog.inDimensionX.text
 v03x    Prejmenovator: vylepsit (crg)
-        Dimension: zprovoznit pro 2D i 3D
 
 v03a    Rozchozeno. Dimension: Width, funguje 3D layer, tj. je bez korekce Nullem.
+v03b    Dimension: Zprovozneno pro 2D i 3D layer. Implementaci re-centeringu.
 
 */
 (function (thisObj) {
     //===========globals
-    var vers = '03a';
+    var vers = '03b';
     var title = 'compsChanger (v' + vers + ')';
     var message = "";
     //==================
@@ -53,8 +53,15 @@ v03a    Rozchozeno. Dimension: Width, funguje 3D layer, tj. je bez korekce Nulle
     function newPanel(thisObj) {
         var win = (thisObj instanceof Panel) ? thisObj 
         : new Window('palette', title, undefined);
-        //  win.preferredSize = [250, 300]; //if not on the size is auto
+        
+        win.orientation = 'column';
+        win.alignChildren = 'fill';
+        win.preferredSize = [200, 300]; // if not - the size is auto
+        var buttonSize = [30, 23];
 
+        // ================panel01================oo
+        // ================Prejmenovator================oo
+        
         var groupOne = win.add('group');
             groupOne.orientation = 'column';
             groupOne.alignChildren = 'fill';
@@ -62,6 +69,9 @@ v03a    Rozchozeno. Dimension: Width, funguje 3D layer, tj. je bez korekce Nulle
         var label01a = groupOne.add('statictext', undefined, 'Width: ');
         groupOne.inDimensionX = groupOne.add('edittext', undefined, undefined);
         groupOne.inDimensionX.characters = 10;
+        var label01a = groupOne.add('statictext', undefined, 'Heyght: ');
+        groupOne.inDimensionY = groupOne.add('edittext', undefined, undefined);
+        groupOne.inDimensionY.characters = 10;
         
         //  apply Button
         groupOne.okBtn = groupOne.add('button', undefined, 'Apply', {name: "ok"});
@@ -80,46 +90,103 @@ v03a    Rozchozeno. Dimension: Width, funguje 3D layer, tj. je bez korekce Nulle
     }
 
     //---------------------------------
-
-    function width(comp, theDialog) {
-    if (theDialog.inDimensionX.text != "") {
+    function makeParentLayerOfAllUnparented(theComp, newParent)
+    {
+        for (var i = 1; i <= theComp.numLayers; i++) {
+            var curLayer = theComp.layer(i);
+            if (curLayer.locked) {curLayer.locked = false;}
+            if (curLayer != newParent && curLayer.parent == null && curLayer.threeDLayer != true) {
+                curLayer.parent = newParent;
+            }
+        }
+    }
+    // parent = the 'null3DLayer' created for this re-centering
+    // axis = direction; 0 = x for witdh, 1 = y for height
+    // shift = how much to shift the null
+    function moveParent(parent, axis, shift) {
+        //null is at 000 anyway, so no math needed
+        newPos = [0, 0, 0];
+        newPos[axis] = shift;
+        parent.position.setValue(newPos);
+    }
+    ///// 2- width
+    // limit=30000
+    function width(item, theDialog) {
+    // if (theDialog.inDimensionX.text != "") {
         if (isNaN(parseInt(theDialog.inDimensionX.text))) {
             message = (message + "Not a number value for Width\r");
             theDialog.inDimensionX.text = ""; //empty field if it is bad so we don't try anymore
         } else {
-            var oldWidth = comp.width;
+            var oldWidth = item.width;
             var newWidth = (parseInt(theDialog.inDimensionX.text));
             if ( (newWidth > 30000) || (newWidth < 4) ) {
                 message = (message + "Value out of range for Width\r");
                 theDialog.inDimensionX.text = ""; //empty field if it is bad so we don't try anymore
             } else {
                 if (oldWidth != newWidth) {
-                    comp.width = newWidth;
+                    item.width = newWidth;
                     message = (message + "Value is OK\r");
+                    // if 'recenter' checkbox is checked:
+                    // if (theDialog.reCenterCheck.value) {
+                        thisMuch = (-1 * (oldWidth - newWidth)) / 2;
+                        null3DLayer = item.layers.addNull();
+                        null3DLayer.threeDLayer = true;
+                        doomedNullSrc = null3DLayer.source; // null project item, so that it could be removed
+                        null3DLayer.position.setValue([0, 0, 0]);
+                        // Set null3DLayer as parent of all layers that don't have parents.  
+                            makeParentLayerOfAllUnparented(item, null3DLayer);
+                            //null, axis, amt
+                            moveParent(null3DLayer, 0, thisMuch);
+                        null3DLayer.remove();
+                        doomedNullSrc.remove();
+                        // }
                     }
                 }
             // alert(message);
             // theDialog.inDimensionX.text = "";//empty field if it is bad so we don't try anymore
-            }
+            // }
         }
     }
-    //------------------------------------
-        //  implementing the particular functions for selected comps
-        function processLoop(array, theDialog) {
-        for (var index = 0; index < array.length; index++) {
-            var element = array[index];
-            
-            
-            if (element instanceof CompItem) {  //  zbytek pracuje jen na comps
-                width(element, theDialog);
-                }
-            // } else {
-            //     callback(element, input1, input2);  // prejmenovator neni omezen
-            // }
+    ///// 3- height
+    // limit=30000
+    function height(item, theDialog) {
+        // if (theDialog.inDimensionX.text != "") {
+            if (isNaN(parseInt(theDialog.inDimensionY.text))) {
+                message = (message + "Not a number value for Height\r");
+                theDialog.inDimensionY.text = ""; //empty field if it is bad so we don't try anymore
+            } else {
+                var oldHeight = item.height;
+                var newHeigh = (parseInt(theDialog.inDimensionY.text));
+                if ( (newHeigh > 30000) || (newHeigh < 4) ) {
+                    message = (message + "Value out of range for Heigh\r");
+                    theDialog.inDimensionY.text = ""; //empty field if it is bad so we don't try anymore
+                } else {
+                    if (oldHeight != newHeigh) {
+                        item.height = newHeigh;
+                        message = (message + "Value is OK\r");
+                        // if 'recenter' checkbox is checked:
+                        // if (theDialog.reCenterCheck.value) {
+                            thisMuch = (-1 * (oldHeight - newHeigh)) / 2;
+                            null3DLayer = item.layers.addNull();
+                            null3DLayer.threeDLayer = true;
+                            doomedNullSrc = null3DLayer.source; // null project item, so that it could be removed
+                            null3DLayer.position.setValue([0, 0, 0]);
+                            // Set null3DLayer as parent of all layers that don't have parents.  
+                            makeParentLayerOfAllUnparented(item, null3DLayer);
+                            //null, axis, amt
+                            moveParent(null3DLayer, 1, thisMuch);
+                            null3DLayer.remove();
+                            doomedNullSrc.remove();
+                            // }
+                        }
+                    }
+                // alert(message);
+                // theDialog.inDimensionY.text = "";//empty field if it is bad so we don't try anymore
+                // }
             }
         }
     //------------------------------------
-    //  main starter function calling the looping function changeMulti()
+    // main starter function calling the looping function changeMulti()
     // function compParamChange(callback, input1, input2) {
     function processIntro(theDialog) {
     // var undoTitle = "Change " + callback.name;
@@ -132,13 +199,34 @@ v03a    Rozchozeno. Dimension: Width, funguje 3D layer, tj. je bez korekce Nulle
             processLoop(selection, theDialog);
         }
     // app.endUndoGroup();
-    }
 
+            //  implementing the particular functions for selected comps
+        function processLoop(array, theDialog) {
+        for (var index = 0; index < array.length; index++) {
+            var element = array[index];
+            
+            
+            if (element instanceof CompItem) {  //  zbytek pracuje jen na comps
+                if (theDialog.inDimensionX.text != "") {
+                    width(element, theDialog);
+                }
+                if (theDialog.inDimensionY.text != "") {
+                    height(element, theDialog);
+                    }
+                // if (message != "") {
+                //     alert("The following problems were found (these settings were not changed!):\r" + message);
+                //     }
+                }
+            // } else {
+            //     callback(element, input1, input2);  // prejmenovator neni omezen
+            // }
+            }
+        }
+    }
 
     function doMain(theDialog) {
     app.beginUndoGroup("Change Selected Comps");
-        var selection = app.project.selection; // compositions
-
+        
         processIntro(theDialog);
 
     app.endUndoGroup();
