@@ -35,12 +35,13 @@ v03     Uplne predelat podle vzoru Design 02 (crg)
         podle toho jestli maji zadany vstup.
         Do funkce spoustene v UI dosazujeme (this.parent), 
         Ve funci pod nazvem promenne, uvnitr pristupujem k hodnotam 
-        napr. takto: theDialog.inDimensionX.text
+        napr. takto: theDialog.txt_in_x.text
 v03x    Prejmenovator: vylepsit (crg)
 
 v03a    Rozchozeno. Dimension: Width, funguje 3D layer, tj. je bez korekce Nullem.
 v03b    Dimension: Zprovozneno pro 2D i 3D layer. Implementaci re-centeringu.
 v03c    Info message zprovoznena.
+v03d    Prejmenovator: Pridan. UI: Dimension a prejmenovator rozchozeno, ale za cenu ztraty deleni na panly a skupiny.
 
 */
 
@@ -64,26 +65,53 @@ var message = "";
 
         // ================panel01================oo
         // ================Prejmenovator================oo
-        
-        var groupOne = win.add('group');
-            groupOne.orientation = 'column';
-            groupOne.alignChildren = 'fill';
+        var panel01 = win.add('panel', undefined, 'Prejmenovator');
+            panel01.orientation = 'column';
+            panel01.alignChildren = 'fill';
+        var p01g01 = win.add('group');
+            p01g01.orientation = 'column';
+            p01g01.alignChildren = 'fill';
         //  input text
-        var label01a = groupOne.add('statictext', undefined, 'Width: ');
-        groupOne.inDimensionX = groupOne.add('edittext', undefined, undefined);
-        groupOne.inDimensionX.characters = 10;
-        var label01a = groupOne.add('statictext', undefined, 'Heyght: ');
-        groupOne.inDimensionY = groupOne.add('edittext', undefined, undefined);
-        groupOne.inDimensionY.characters = 10;
+        var label_01 = win.add('statictext', undefined, 'Search for:');
+        win.txt_in_search = win.add('edittext', undefined, '');
+        win.txt_in_search.characters = 25;
+        var label_02 = win.add('statictext', undefined, 'Replace with:');
+        win.txt_in_replace = win.add('edittext', undefined, '', /*{enterKeySignalsOnChange: false}*/);
+        win.txt_in_replace.characters = 25;
+        //  apply Button
+        win.btnRename = win.add('button', undefined, 'Apply', {name: "Prejmenovator"});
+        
+        
+        //  ================panel02================oo
+        //  ================compSettings================oo
+        
+        // var p01g02 = win.add('group');
+        //     p01g02.orientation = 'column';
+        //     p01g02.alignChildren = 'fill';
+        //  input text
+        var label01a = win.add('statictext', undefined, 'Width: ');
+        win.txt_in_x = win.add('edittext', undefined, '');
+        win.txt_in_x.characters = 10;
+        var label01a = win.add('statictext', undefined, 'Height: ');
+        win.txt_in_y = win.add('edittext', undefined, '');
+        win.txt_in_y.characters = 10;
         
         //  apply Button
-        groupOne.okBtn = groupOne.add('button', undefined, 'Apply', {name: "ok"});
+        win.btnCompSet = win.add('button', undefined, 'Apply', {name: "compSettings"});
         
         // --- Action ---
-        groupOne.okBtn.onClick = function () {
+        // --- Action ---
+        // function triggerPrejmen() {
+        //     doMain(this.parent); // Calls doMain with the win object
+        // }
+        win.btnRename.onClick = function () {
+            doMain(this.parent); // Calls doMain with the win object
+            }
+        win.btnCompSet.onClick = function () {
             doMain(this.parent); // Calls doMain with the win object
         }
-
+        
+        //  ================window================oo
         // --- ACTIONS ---
         win.onResizing = win.onResize = function () {
             this.layout.resize();
@@ -91,8 +119,24 @@ var message = "";
         win instanceof Window
             ? (win.center(), win.show()) : (win.layout.layout(true), win.layout.resize());
     }
+    //========================callback========================
+    ///// 1- prejmenOvator
+    function prejmenOvator(item, theDialog) {
 
-    //---------------------------------
+        var oldString = theDialog.txt_in_search.text;
+        var newString = theDialog.txt_in_replace.text;
+
+        var oldName = comp.name; // nome da item
+        var newName = oldName.replace(oldString, newString);
+            
+            comp.name = newName;
+        //  fixing broken expressions due to the change of the name;              
+        app.project.autoFixExpressions(oldName, newName);
+    }
+
+
+
+    //------------------------------------dimension
     function makeParentLayerOfAllUnparented(theComp, newParent)
     {
         for (var i = 1; i <= theComp.numLayers; i++) {
@@ -115,16 +159,16 @@ var message = "";
     ///// 2- width
     // limit=30000
     function width(item, theDialog) {
-    // if (theDialog.inDimensionX.text != "") {
-        if (isNaN(parseInt(theDialog.inDimensionX.text))) {
+    // if (theDialog.txt_in_x.text != "") {
+        if (isNaN(parseInt(theDialog.txt_in_x.text))) {
             message = (message + "Not a number value for Width\r");
-            theDialog.inDimensionX.text = ""; //empty field if it is bad so we don't try anymore
+            theDialog.txt_in_x.text = ""; //empty field if it is bad so we don't try anymore
         } else {
             var oldWidth = item.width;
-            var newWidth = (parseInt(theDialog.inDimensionX.text));
+            var newWidth = (parseInt(theDialog.txt_in_x.text));
             if ( (newWidth > 30000) || (newWidth < 4) ) {
                 message = (message + "Value out of range for Width\r");
-                theDialog.inDimensionX.text = ""; //empty field if it is bad so we don't try anymore
+                theDialog.txt_in_x.text = ""; //empty field if it is bad so we don't try anymore
             } else {
                 if (oldWidth != newWidth) {
                     item.width = newWidth;
@@ -146,24 +190,21 @@ var message = "";
                         // }
                     }
                 }
-            // alert(message);
-            // theDialog.inDimensionX.text = "";//empty field if it is bad so we don't try anymore
-            // }
         }
     }
     ///// 3- height
     // limit=30000
     function height(item, theDialog) {
-        // if (theDialog.inDimensionX.text != "") {
-            if (isNaN(parseInt(theDialog.inDimensionY.text))) {
+        // if (theDialog.txt_in_y.text != "") {
+            if (isNaN(parseInt(theDialog.txt_in_y.text))) {
                 message = (message + "Not a number value for Height\r");
-                theDialog.inDimensionY.text = ""; //empty field if it is bad so we don't try anymore
+                theDialog.txt_in_y.text = ""; //empty field if it is bad so we don't try anymore
             } else {
                 var oldHeight = item.height;
-                var newHeigh = (parseInt(theDialog.inDimensionY.text));
+                var newHeigh = (parseInt(theDialog.txt_in_y.text));
                 if ( (newHeigh > 30000) || (newHeigh < 4) ) {
                     message = (message + "Value out of range for Heigh\r");
-                    theDialog.inDimensionY.text = ""; //empty field if it is bad so we don't try anymore
+                    theDialog.txt_in_y.text = ""; //empty field if it is bad so we don't try anymore
                 } else {
                     if (oldHeight != newHeigh) {
                         item.height = newHeigh;
@@ -184,54 +225,179 @@ var message = "";
                             // }
                         }
                     }
-                // alert(message);
-                // theDialog.inDimensionY.text = "";//empty field if it is bad so we don't try anymore
-                // }
             }
         }
     //------------------------------------
-    // main starter function calling the looping function changeMulti()
-    // function compParamChange(callback, input1, input2) {
-    function processIntro(theDialog) {
-    // var undoTitle = "Change " + callback.name;
-    // app.beginUndoGroup(undoTitle);
-    var selection = app.project.selection; // compositions
+    // calling the loop
+    
+    
+    //  implementing the particular functions for selected comps
+    // function processLoop(array, theDialog) {
+    // for (var index = 0; index < array.length; index++) {
+    //     var element = array[index];
+        
+        
+    //     if (element instanceof CompItem) {  //  zbytek pracuje jen na comps
+    //         if (theDialog.txt_in_search.text != "") {
+    //             prejmenOvator(element, theDialog);
+    //         }
+    //         if (theDialog.txt_in_x.text != "") {
+    //             width(element, theDialog);
+    //         }
+    //         if (theDialog.txt_in_y.text != "") {
+    //             height(element, theDialog);
+    //             }
+    //         if (message != "") {
+    //             alert("The following problems were found (these settings were not changed!):\r" + message);
+    //             }
+    //         }
+    //     // } else {
+    //     //     callback(element, input1, input2);  // prejmenovator neni omezen
+    //     // }
+    //     }
+    // }
+
+    // function processIntro(theDialog) {
+    // // var undoTitle = "Change " + callback.name;
+    // // app.beginUndoGroup(undoTitle);
+    // var selection = app.project.selection; // compositions
+
+    //     if (selection.length == 0) {
+    //         alert("Select a composition");
+    //     } else {
+    //         processLoop(selection, theDialog);
+    //     }
+    // // app.endUndoGroup();
+    // }
+    
+    function doMain(theDialog) {
+    app.beginUndoGroup("Change Selected Comps");
+        
+        var selection = app.project.selection; // compositions
 
         if (selection.length == 0) {
             alert("Select a composition");
         } else {
-            processLoop(selection, theDialog);
-        }
-    // app.endUndoGroup();
+            for (var index = 0; index < selection.length; index++) {
+            var item = selection[index];
+                
+        if (item instanceof CompItem) {  //  zbytek pracuje jen na comps
 
-            //  implementing the particular functions for selected comps
-        function processLoop(array, theDialog) {
-        for (var index = 0; index < array.length; index++) {
-            var element = array[index];
-            
-            
-            if (element instanceof CompItem) {  //  zbytek pracuje jen na comps
-                if (theDialog.inDimensionX.text != "") {
-                    width(element, theDialog);
+
+
+        //========================callback========================
+        ///// 1- prejmenOvator
+        // function prejmenOvator(item, theDialog) {
+        if (theDialog.txt_in_search.text != "") {
+            var oldString = theDialog.txt_in_search.text;
+            var newString = theDialog.txt_in_replace.text;
+
+            var oldName = item.name; // nome da item
+            var newName = oldName.replace(oldString, newString);
+                
+                item.name = newName;
+            //  fixing broken expressions due to the change of the name;              
+            app.project.autoFixExpressions(oldName, newName);
+        }
+
+
+
+        //------------------------------------dimension
+        function makeParentLayerOfAllUnparented(theComp, newParent)
+        {
+            for (var i = 1; i <= theComp.numLayers; i++) {
+                var curLayer = theComp.layer(i);
+                if (curLayer.locked) {curLayer.locked = false;}
+                if (curLayer != newParent && curLayer.parent == null && curLayer.threeDLayer != true) {
+                    curLayer.parent = newParent;
                 }
-                if (theDialog.inDimensionY.text != "") {
-                    height(element, theDialog);
-                    }
-                if (message != "") {
-                    alert("The following problems were found (these settings were not changed!):\r" + message);
-                    }
-                }
-            // } else {
-            //     callback(element, input1, input2);  // prejmenovator neni omezen
-            // }
             }
         }
-    }
+        // parent = the 'null3DLayer' created for this re-centering
+        // axis = direction; 0 = x for witdh, 1 = y for height
+        // shift = how much to shift the null
+        function moveParent(parent, axis, shift) {
+            //null is at 000 anyway, so no math needed
+            newPos = [0, 0, 0];
+            newPos[axis] = shift;
+            parent.position.setValue(newPos);
+        }
+        ///// 2- width
+        // limit=30000
+        // function width(item, theDialog) {
+        if (theDialog.txt_in_x.text != "") {
+            if (isNaN(parseInt(theDialog.txt_in_x.text))) {
+                message = (message + "Not a number value for Width\r");
+                theDialog.txt_in_x.text = ""; //empty field if it is bad so we don't try anymore
+            } else {
+                var oldWidth = item.width;
+                var newWidth = (parseInt(theDialog.txt_in_x.text));
+                if ( (newWidth > 30000) || (newWidth < 4) ) {
+                    message = (message + "Value out of range for Width\r");
+                    theDialog.txt_in_x.text = ""; //empty field if it is bad so we don't try anymore
+                } else {
+                    if (oldWidth != newWidth) {
+                        item.width = newWidth;
+                        // message = (message + "Value is OK\r"); // test messagae
+                        // re-centering: na rozdil od CRG je stale zapnuty
+                        // if 'recenter' checkbox is checked:
+                        // if (theDialog.reCenterCheck.value) {
+                            thisMuch = (-1 * (oldWidth - newWidth)) / 2;
+                            null3DLayer = item.layers.addNull();
+                            null3DLayer.threeDLayer = true;
+                            doomedNullSrc = null3DLayer.source; // null project item, so that it could be removed
+                            null3DLayer.position.setValue([0, 0, 0]);
+                            // Set null3DLayer as parent of all layers that don't have parents.  
+                                makeParentLayerOfAllUnparented(item, null3DLayer);
+                                //null, axis, amt
+                                moveParent(null3DLayer, 0, thisMuch);
+                            null3DLayer.remove();
+                            doomedNullSrc.remove();
+                            // }
+                        }
+                    }
+                }
+            }
+        // }
+        ///// 3- height
+        // limit=30000
 
-    function doMain(theDialog) {
-    app.beginUndoGroup("Change Selected Comps");
-        
-        processIntro(theDialog);
+        if (theDialog.txt_in_y.text != "") {
+            if (isNaN(parseInt(theDialog.txt_in_y.text))) {
+                message = (message + "Not a number value for Height\r");
+                theDialog.txt_in_y.text = ""; //empty field if it is bad so we don't try anymore
+            } else {
+                var oldHeight = item.height;
+                var newHeigh = (parseInt(theDialog.txt_in_y.text));
+                if ( (newHeigh > 30000) || (newHeigh < 4) ) {
+                    message = (message + "Value out of range for Heigh\r");
+                    theDialog.txt_in_y.text = ""; //empty field if it is bad so we don't try anymore
+                } else {
+                    if (oldHeight != newHeigh) {
+                        item.height = newHeigh;
+                        // message = (message + "Value is OK\r"); // test messagae
+                        // if 'recenter' checkbox is checked:
+                        // if (theDialog.reCenterCheck.value) {
+                            thisMuch = (-1 * (oldHeight - newHeigh)) / 2;
+                            null3DLayer = item.layers.addNull();
+                            null3DLayer.threeDLayer = true;
+                            doomedNullSrc = null3DLayer.source; // null project item, so that it could be removed
+                            null3DLayer.position.setValue([0, 0, 0]);
+                            // Set null3DLayer as parent of all layers that don't have parents.  
+                            makeParentLayerOfAllUnparented(item, null3DLayer);
+                            //null, axis, amt
+                            moveParent(null3DLayer, 1, thisMuch);
+                            null3DLayer.remove();
+                            doomedNullSrc.remove();
+                            // }
+                        }
+                    }
+                }
+            }
+            //------------------------------------
+            }
+        }
+    }   
 
     app.endUndoGroup();
     }
