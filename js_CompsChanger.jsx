@@ -1,7 +1,7 @@
 /*
 js_compsChanger
-copyright Jan Svatuska 2024
-241210
+copyright Jan Svatuska 2025
+250216
 v01a    Dimension section reposition 3D layer, but not 2D
         nefunguje y pokud x = 0, nebo neni zadano
 v01b    Condition for dimension: if (inputX.length > 0)
@@ -49,10 +49,11 @@ v03e    Solution: doMain(this.parent.parent); // Failed. Worked only for the fir
 v03f    Solution: doMain(panel01, panel02); // Worked. The functions are separated into panels and groups.
 v03g    Prejmenovator: EventListener added to 'replace with' and 'Apply' button.
 v03h    Prejmenovator: 3-way: Search&Replace, Append, Remove.
+v03i    Complete: Duration, FPS, Start, Duration including subComps.
 */
 
 //===========globals
-var vers = '03b';
+var vers = '03i';
 var title = 'compsChanger (v' + vers + ')';
 var message = "";
 //==================
@@ -128,17 +129,44 @@ var message = "";
             panel02.orientation = 'column';
             panel02.alignChildren = 'fill';
         var p02g01 = panel02.add('group');
-            p02g01.orientation = 'column';
-            p02g01.alignChildren = 'fill';
+            p02g01.orientation = 'row';
+            p02g01.alignChildren = 'center';
+        var p02g02 = panel02.add('group');
+            p02g02.orientation = 'column';
+            p02g02.alignChildren = 'fill';
+        var panel02_groupA = p02g01.add('group', undefined, 'labely a pole');
+            panel02_groupA.orientation = 'column';
+            panel02_groupA.alignChildren = 'right';
+        var panel02_group_0 = panel02_groupA.add('group', undefined, 'width');
+            panel02_group_0.orientation = 'row';
+        var panel02_group_1 = panel02_groupA.add('group', undefined, 'height');
+            panel02_group_1.orientation = 'row';
+        var panel02_group_2 = panel02_groupA.add('group', undefined, 'Framerate');
+            panel02_group_2.orientation = 'row';
+        var panel02_group_3 = panel02_groupA.add('group', undefined, 'Start');
+            panel02_group_3.orientation = 'row';
+        var panel02_group_4 = panel02_groupA.add('group', undefined, 'Duration');
+            panel02_group_4.orientation = 'row';
         //  input text
-        var label01a = p02g01.add('statictext', undefined, 'Width: ');
-        panel02.txt_in_x = p02g01.add('edittext', undefined, '');
+        panel02.label01a = panel02_group_0.add('statictext', undefined, 'Width: ');
+        panel02.txt_in_x = panel02_group_0.add('edittext', undefined, '');
         panel02.txt_in_x.characters = 10;
-        var label01b = p02g01.add('statictext', undefined, 'Height: ');
-        panel02.txt_in_y = p02g01.add('edittext', undefined, '');
+        panel02.label01b = panel02_group_1.add('statictext', undefined, 'Height: ');
+        panel02.txt_in_y = panel02_group_1.add('edittext', undefined, '');
         panel02.txt_in_y.characters = 10;
+        panel02.label03 = panel02_group_2.add('statictext', undefined, 'FPS: ');
+        panel02.txt_in_fps = panel02_group_2.add('edittext', undefined, '');
+        panel02.txt_in_fps.characters = 10;
+        panel02.label04 = panel02_group_3.add('statictext', undefined, 'Start: ');
+        panel02.txt_in_start = panel02_group_3.add('edittext', undefined, '');
+        panel02.txt_in_start.characters = 10;
+        panel02.label05 = panel02_group_4.add('statictext', undefined, 'Duration: ');
+        panel02.txt_in_dur = panel02_group_4.add('edittext', undefined, '');
+        panel02.txt_in_dur.characters = 10;
+        panel02.durChkBx = panel02_groupA.add('checkbox', undefined, 'Duration including subComps');
+        panel02.durChkBx.value = false;
         //  apply Button
-        panel02.btnCompSet = p02g01.add('button', undefined, 'Apply', {name: "compSettings"});
+        panel02.btnCompSet = p02g02.add('button', undefined, 'OK', {name: "compSettings"});
         
         // --- Action ---
         //  "Enter" v poli "Replace" spusti funkci
@@ -202,6 +230,18 @@ var message = "";
                     if (panel02.txt_in_y.text != "") {
                         height(item, panel02);
                     }
+                    if (panel02.txt_in_start.text != "") {
+                        zkracovator(item, panel02);
+                    }
+                    if (panel02.txt_in_fps.text != "") {
+                        fps(item, panel02);
+                    }
+                    if (panel02.txt_in_dur.text != "" && panel02.durChkBx.value == false) {
+                        duration(item, panel02);
+                    }
+                    if (panel02.txt_in_dur.text != "" && panel02.durChkBx.value == true) {
+                        durationInDepht(item, panel02);
+                    }
                     if (message != "") {
                         alert("The following problems were found (these settings were not changed!):\r" + message);
                     }
@@ -212,6 +252,40 @@ var message = "";
         app.endUndoGroup();
     }
     
+    //  work area IN
+    function zkracovator(comp, panel) {
+        var startTimeL = panel.txt_in_start.text;
+        if (startTimeL != "") {
+            if(isNaN(parseFloat(startTimeL))) {
+                alertStr = ("Not a number for Width\r");
+                inWorkAreaIn.text = "";    // clear field in case of NaN input
+            } else {
+        var compDur = comp.duration;
+        var compDurFixed = compDur//.toFixed(0); //round to integer
+        if (compDur > 1) {  //  fix stopping on comps shorter than 01s
+        comp.workAreaStart = startTimeL;
+        comp.workAreaDuration = compDurFixed - startTimeL;
+                }
+            }
+        }
+    }
+    
+    function fps(comp, panel) {
+        var input = panel.txt_in_fps.text;
+        if (input != "") {
+            if(isNaN(parseFloat(input))) {
+                alertStr = ("Not a number for Width\r");
+                inFps.text = "";    // clear field in case of NaN input
+            } else {
+        var inputDecimalFix = input.replace(/,/, ".");
+        var newFpsFloat = parseFloat(inputDecimalFix).toFixed(3);
+        //var newFpsFixed = newFpsFloat.toFixed(3);
+        comp.frameRate = newFpsFloat;
+            }
+        }
+    }
+
+
     function prejmenOvator(item, panel) {
         var oldString = panel.txt_in_search.text;
         var newString = panel.txt_in_replace.text;
@@ -322,5 +396,82 @@ var message = "";
             }
         }
     }
+
+    //---------------compDurationChange--------------------
+    //---change-only-selected-comp-duration----------------
+    function duration(comp, panel) {
+        var input = panel.txt_in_dur.text;
+        if (input != "") {
+            if(isNaN(parseFloat(input))) {
+                alertStr = ("Not a number for Duration\r");
+                panel.txt_in_dur.text = "";    // clear field in case of NaN input
+            } else {
+        var inputDecimalFix = input.replace(/,/, ".");
+        var newDuration = parseFloat(inputDecimalFix).toFixed(2);
+        comp.duration = newDuration;
+            }
+        }
+    }
+    //---change-including-the-comps-content----------------
+    function durationInDepht(comp, panel) {
+        var newDuration = panel.txt_in_dur.text;
+        const subCompArr = levelOrderTraversal(comp);
+        for (var i = 0; i < subCompArr.length; i++) {
+            changeDuration(subCompArr[i], newDuration);
+        }
+    
+    //  setting the dur for layers of the comp
+    //  layer - set new out point
+    //  layer-comp - set new duration to the source comp
+    function changeDuration(comp, newDuration) {
+        
+        var compLayerArr = comp.layers; // prohlidka vrstev
+        comp.duration = newDuration;
+
+        for (var j = 1; j <= compLayerArr.length; j++) {
+            var layerSource = compLayerArr[j].source;
+            var layer = compLayerArr[j];
+            
+            if (layerSource instanceof CompItem) {
+                layerSource.duration = newDuration;
+            }
+            layer.outPoint = newDuration;
+        }
+    }
+    //  iterating through the subComps
+    function levelOrderTraversal(root) {
+        if (root == null)
+            return;
+
+        // Standard level order traversal code
+        // using queue
+        var arr = [];
+        var q = []; // Create a queue
+        q.push(root); // push root 
+        while (q.length != 0) {
+            var n = q.length;
+
+            // If this node has children
+            while (n > 0) {
+                // Dequeue an item from queue
+                // and print it
+                var item = q[0];
+                q.shift();
+                arr.push(item);
+                //console.log(p.key + " ");
+                var itemLayers = item.layers;
+                // push all children of the dequeued item
+                for (var i = 1; i <= item.layers.length; i++) {
+                    if (item.layers[i].source instanceof CompItem) {
+                    q.push(item.layers[i].source);
+                        }
+                    }
+                n--;
+            }
+        }
+        return arr;
+    }
+    }
+
 
 })(this);
