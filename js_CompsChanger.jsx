@@ -42,8 +42,11 @@ v03a    Rozchozeno. Dimension: Width, funguje 3D layer, tj. je bez korekce Nulle
 v03b    Dimension: Zprovozneno pro 2D i 3D layer. Implementaci re-centeringu.
 v03c    Info message zprovoznena.
 v03d    Prejmenovator: Pridan. UI: Dimension a prejmenovator rozchozeno, ale za cenu ztraty deleni na panly a skupiny.
-v03e
-Request for Copilot: I have this Adobe After Effects script with UI panel. It has 2 functions: Renamer and Dimension. I have tried this script design where the functions can read the input from UI by passing the dialog object. The script is working, but I have a problem with the UI design. I would like to have the script with the same functionality but with the UI design where the functions are separated into panels and groups. I have tried to do it, but I have failed. Can you help me with this? I can provide you with the script. Thank you.
+
+Request for Copilot: I have this Adobe After Effects script with UI panel. It has 2 functions: Renamer and Dimension. I have tried this script design where the functions can read the input from UI by passing the dialog object. The script is working, but I have a problem with the UI design. I would like to have the script with the same functionality but with the UI design where the functions are separated into panels and groups. I have tried to do it, but I have failed. Can you help me with this? I can provide you with the script. Thank you. 
+
+v03e    Solution: doMain(this.parent.parent); // Failed. Worked only for the first function.
+v03f    Solution: doMain(panel01, panel02); // Worked. The functions are separated into panels and groups.
 */
 
 //===========globals
@@ -102,10 +105,10 @@ var message = "";
         
         // --- Action ---
         panel01.btnRename.onClick = function () {
-            doMain(this.parent.parent); // Calls doMain with the win object
+            doMain(panel01, panel02); // Pass both panels to doMain
         }
         panel02.btnCompSet.onClick = function () {
-            doMain(this.parent.parent); // Calls doMain with the win object
+            doMain(panel01, panel02); // Pass both panels to doMain
         }
         
         //  ================window================oo
@@ -119,9 +122,7 @@ var message = "";
 
     //========================function========================
 
-    
-    
-    function doMain(theDialog) {
+    function doMain(panel01, panel02) {
         app.beginUndoGroup("Change Selected Comps");
         
         var selection = app.project.selection; // compositions
@@ -130,127 +131,109 @@ var message = "";
             alert("Select a composition");
         } else {
             for (var index = 0; index < selection.length; index++) {
-            var item = selection[index];
+                var item = selection[index];
                 
-        if (item instanceof CompItem) {  //  zbytek pracuje jen na comps
-
-
-
-        //========================callback========================
-        ///// 1- prejmenOvator
-        // function prejmenOvator(item, theDialog) {
-        if (theDialog.txt_in_search.text != "") {
-            var oldString = theDialog.txt_in_search.text;
-            var newString = theDialog.txt_in_replace.text;
-
-            var oldName = item.name; // nome da item
-            var newName = oldName.replace(oldString, newString);
-                
-                item.name = newName;
-            //  fixing broken expressions due to the change of the name;              
-            app.project.autoFixExpressions(oldName, newName);
-        }
-
-
-
-        //------------------------------------dimension
-        function makeParentLayerOfAllUnparented(theComp, newParent)
-        {
-            for (var i = 1; i <= theComp.numLayers; i++) {
-                var curLayer = theComp.layer(i);
-                if (curLayer.locked) {curLayer.locked = false;}
-                if (curLayer != newParent && curLayer.parent == null && curLayer.threeDLayer != true) {
-                    curLayer.parent = newParent;
-                }
-            }
-        }
-        // parent = the 'null3DLayer' created for this re-centering
-        // axis = direction; 0 = x for witdh, 1 = y for height
-        // shift = how much to shift the null
-        function moveParent(parent, axis, shift) {
-            //null is at 000 anyway, so no math needed
-            newPos = [0, 0, 0];
-            newPos[axis] = shift;
-            parent.position.setValue(newPos);
-        }
-        ///// 2- width
-        // limit=30000
-        // function width(item, theDialog) {
-        if (theDialog.txt_in_x.text != "") {
-            if (isNaN(parseInt(theDialog.txt_in_x.text))) {
-                message = (message + "Not a number value for Width\r");
-                theDialog.txt_in_x.text = ""; //empty field if it is bad so we don't try anymore
-            } else {
-                var oldWidth = item.width;
-                var newWidth = (parseInt(theDialog.txt_in_x.text));
-                if ( (newWidth > 30000) || (newWidth < 4) ) {
-                    message = (message + "Value out of range for Width\r");
-                    theDialog.txt_in_x.text = ""; //empty field if it is bad so we don't try anymore
-                } else {
-                    if (oldWidth != newWidth) {
-                        item.width = newWidth;
-                        // message = (message + "Value is OK\r"); // test messagae
-                        // re-centering: na rozdil od CRG je stale zapnuty
-                        // if 'recenter' checkbox is checked:
-                        // if (theDialog.reCenterCheck.value) {
-                            thisMuch = (-1 * (oldWidth - newWidth)) / 2;
-                            null3DLayer = item.layers.addNull();
-                            null3DLayer.threeDLayer = true;
-                            doomedNullSrc = null3DLayer.source; // null project item, so that it could be removed
-                            null3DLayer.position.setValue([0, 0, 0]);
-                            // Set null3DLayer as parent of all layers that don't have parents.  
-                                makeParentLayerOfAllUnparented(item, null3DLayer);
-                                //null, axis, amt
-                                moveParent(null3DLayer, 0, thisMuch);
-                            null3DLayer.remove();
-                            doomedNullSrc.remove();
-                            // }
-                        }
+                if (item instanceof CompItem) {  //  zbytek pracuje jen na comps
+                    if (panel01.txt_in_search.text != "") {
+                        prejmenOvator(item, panel01);
+                    }
+                    if (panel02.txt_in_x.text != "") {
+                        width(item, panel02);
+                    }
+                    if (panel02.txt_in_y.text != "") {
+                        height(item, panel02);
+                    }
+                    if (message != "") {
+                        alert("The following problems were found (these settings were not changed!):\r" + message);
                     }
                 }
             }
-        // }
-        ///// 3- height
-        // limit=30000
-
-        if (theDialog.txt_in_y.text != "") {
-            if (isNaN(parseInt(theDialog.txt_in_y.text))) {
-                message = (message + "Not a number value for Height\r");
-                theDialog.txt_in_y.text = ""; //empty field if it is bad so we don't try anymore
-            } else {
-                var oldHeight = item.height;
-                var newHeigh = (parseInt(theDialog.txt_in_y.text));
-                if ( (newHeigh > 30000) || (newHeigh < 4) ) {
-                    message = (message + "Value out of range for Heigh\r");
-                    theDialog.txt_in_y.text = ""; //empty field if it is bad so we don't try anymore
-                } else {
-                    if (oldHeight != newHeigh) {
-                        item.height = newHeigh;
-                        // message = (message + "Value is OK\r"); // test messagae
-                        // if 'recenter' checkbox is checked:
-                        // if (theDialog.reCenterCheck.value) {
-                            thisMuch = (-1 * (oldHeight - newHeigh)) / 2;
-                            null3DLayer = item.layers.addNull();
-                            null3DLayer.threeDLayer = true;
-                            doomedNullSrc = null3DLayer.source; // null project item, so that it could be removed
-                            null3DLayer.position.setValue([0, 0, 0]);
-                            // Set null3DLayer as parent of all layers that don't have parents.  
-                            makeParentLayerOfAllUnparented(item, null3DLayer);
-                            //null, axis, amt
-                            moveParent(null3DLayer, 1, thisMuch);
-                            null3DLayer.remove();
-                            doomedNullSrc.remove();
-                            // }
-                        }
-                    }
-                }
-            }
-            //------------------------------------
-            }
-        }
-    }   
+        }   
 
         app.endUndoGroup();
+    }
+
+    function prejmenOvator(item, panel) {
+        var oldString = panel.txt_in_search.text;
+        var newString = panel.txt_in_replace.text;
+
+        var oldName = item.name; // nome da item
+        var newName = oldName.replace(oldString, newString);
+            
+        item.name = newName;
+        //  fixing broken expressions due to the change of the name;              
+        app.project.autoFixExpressions(oldName, newName);
+    }
+
+    function makeParentLayerOfAllUnparented(theComp, newParent) {
+        for (var i = 1; i <= theComp.numLayers; i++) {
+            var curLayer = theComp.layer(i);
+            if (curLayer.locked) {curLayer.locked = false;}
+            if (curLayer != newParent && curLayer.parent == null && curLayer.threeDLayer != true) {
+                curLayer.parent = newParent;
+            }
+        }
+    }
+
+    function moveParent(parent, axis, shift) {
+        //null is at 000 anyway, so no math needed
+        newPos = [0, 0, 0];
+        newPos[axis] = shift;
+        parent.position.setValue(newPos);
+    }
+
+    function width(item, panel) {
+        if (isNaN(parseInt(panel.txt_in_x.text))) {
+            message = (message + "Not a number value for Width\r");
+            panel.txt_in_x.text = ""; //empty field if it is bad so we don't try anymore
+        } else {
+            var oldWidth = item.width;
+            var newWidth = (parseInt(panel.txt_in_x.text));
+            if ( (newWidth > 30000) || (newWidth < 4) ) {
+                message = (message + "Value out of range for Width\r");
+                panel.txt_in_x.text = ""; //empty field if it is bad so we don't try anymore
+            } else {
+                if (oldWidth != newWidth) {
+                    item.width = newWidth;
+                    thisMuch = (-1 * (oldWidth - newWidth)) / 2;
+                    null3DLayer = item.layers.addNull();
+                    null3DLayer.threeDLayer = true;
+                    doomedNullSrc = null3DLayer.source; // null project item, so that it could be removed
+                    null3DLayer.position.setValue([0, 0, 0]);
+                    makeParentLayerOfAllUnparented(item, null3DLayer);
+                    moveParent(null3DLayer, 0, thisMuch);
+                    null3DLayer.remove();
+                    doomedNullSrc.remove();
+                }
+            }
+        }
+    }
+
+    function height(item, panel) {
+        if (isNaN(parseInt(panel.txt_in_y.text))) {
+            message = (message + "Not a number value for Height\r");
+            panel.txt_in_y.text = ""; //empty field if it is bad so we don't try anymore
+        } else {
+            var oldHeight = item.height;
+            var newHeight = (parseInt(panel.txt_in_y.text));
+            if ( (newHeight > 30000) || (newHeight < 4) ) {
+                message = (message + "Value out of range for Height\r");
+                panel.txt_in_y.text = ""; //empty field if it is bad so we don't try anymore
+            } else {
+                if (oldHeight != newHeight) {
+                    item.height = newHeight;
+                    thisMuch = (-1 * (oldHeight - newHeight)) / 2;
+                    null3DLayer = item.layers.addNull();
+                    null3DLayer.threeDLayer = true;
+                    doomedNullSrc = null3DLayer.source; // null project item, so that it could be removed
+                    null3DLayer.position.setValue([0, 0, 0]);
+                    makeParentLayerOfAllUnparented(item, null3DLayer);
+                    moveParent(null3DLayer, 1, thisMuch);
+                    null3DLayer.remove();
+                    doomedNullSrc.remove();
+                }
+            }
+        }
     }
 
 })(this);
