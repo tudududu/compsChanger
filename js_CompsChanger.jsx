@@ -47,6 +47,7 @@ Request for Copilot: I have this Adobe After Effects script with UI panel. It ha
 
 v03e    Solution: doMain(this.parent.parent); // Failed. Worked only for the first function.
 v03f    Solution: doMain(panel01, panel02); // Worked. The functions are separated into panels and groups.
+v03g    Prejmenovator: EventListener added to 'replace with' and 'Apply' button.
 */
 
 //===========globals
@@ -104,6 +105,28 @@ var message = "";
         panel02.btnCompSet = p02g01.add('button', undefined, 'Apply', {name: "compSettings"});
         
         // --- Action ---
+        //  "Enter" v poli "Replace" spusti funkci
+        panel01.txt_in_replace.addEventListener("keydown", function(kd) {pressed (kd)});
+        function pressed(k) {
+            if (k.keyName === "Enter") {
+                //alert("You pressed " + k.keyName);
+                doMain(panel01, panel02); // Pass both panels to doMain
+            }
+        }
+        //  "Enter" na tlacitku spusti funkci
+        panel01.btnRename.addEventListener("keydown", function(kd) {pressed_02 (kd)});
+        function pressed_02(k) {
+            if (k.keyName === "Enter") {
+                //alert("You pressed " + k.keyName);
+                doMain(panel01, panel02); // Pass both panels to doMain
+            }
+            /*if (k.keyName === "Tab") {
+                txt_in_search.active = true;
+                //alert("You pressed " + k.keyName);
+            }*/
+        }
+
+        // ================click================oo
         panel01.btnRename.onClick = function () {
             doMain(panel01, panel02); // Pass both panels to doMain
         }
