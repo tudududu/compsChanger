@@ -42,7 +42,8 @@ v03a    Rozchozeno. Dimension: Width, funguje 3D layer, tj. je bez korekce Nulle
 v03b    Dimension: Zprovozneno pro 2D i 3D layer. Implementaci re-centeringu.
 v03c    Info message zprovoznena.
 v03d    Prejmenovator: Pridan. UI: Dimension a prejmenovator rozchozeno, ale za cenu ztraty deleni na panly a skupiny.
-
+v03e
+Request for Copilot: I have this Adobe After Effects script with UI panel. It has 2 functions: Renamer and Dimension. I have tried this script design where the functions can read the input from UI by passing the dialog object. The script is working, but I have a problem with the UI design. I would like to have the script with the same functionality but with the UI design where the functions are separated into panels and groups. I have tried to do it, but I have failed. Can you help me with this? I can provide you with the script. Thank you.
 */
 
 //===========globals
@@ -53,7 +54,7 @@ var message = "";
     
 (function (thisObj) {
     newPanel(thisObj);
-
+    //========================UI========================
     function newPanel(thisObj) {
         var win = (thisObj instanceof Panel) ? thisObj 
         : new Window('palette', title, undefined);
@@ -68,47 +69,43 @@ var message = "";
         var panel01 = win.add('panel', undefined, 'Prejmenovator');
             panel01.orientation = 'column';
             panel01.alignChildren = 'fill';
-        var p01g01 = win.add('group');
+        var p01g01 = panel01.add('group');
             p01g01.orientation = 'column';
             p01g01.alignChildren = 'fill';
         //  input text
-        var label_01 = win.add('statictext', undefined, 'Search for:');
-        win.txt_in_search = win.add('edittext', undefined, '');
-        win.txt_in_search.characters = 25;
-        var label_02 = win.add('statictext', undefined, 'Replace with:');
-        win.txt_in_replace = win.add('edittext', undefined, '', /*{enterKeySignalsOnChange: false}*/);
-        win.txt_in_replace.characters = 25;
+        var label_01 = p01g01.add('statictext', undefined, 'Search for:');
+        panel01.txt_in_search = p01g01.add('edittext', undefined, '');
+        panel01.txt_in_search.characters = 25;
+        var label_02 = p01g01.add('statictext', undefined, 'Replace with:');
+        panel01.txt_in_replace = p01g01.add('edittext', undefined, '');
+        panel01.txt_in_replace.characters = 25;
         //  apply Button
-        win.btnRename = win.add('button', undefined, 'Apply', {name: "Prejmenovator"});
-        
+        panel01.btnRename = p01g01.add('button', undefined, 'Apply', {name: "Prejmenovator"});
         
         //  ================panel02================oo
         //  ================compSettings================oo
-        
-        // var p01g02 = win.add('group');
-        //     p01g02.orientation = 'column';
-        //     p01g02.alignChildren = 'fill';
+        var panel02 = win.add('panel', undefined, 'Dimension');
+            panel02.orientation = 'column';
+            panel02.alignChildren = 'fill';
+        var p02g01 = panel02.add('group');
+            p02g01.orientation = 'column';
+            p02g01.alignChildren = 'fill';
         //  input text
-        var label01a = win.add('statictext', undefined, 'Width: ');
-        win.txt_in_x = win.add('edittext', undefined, '');
-        win.txt_in_x.characters = 10;
-        var label01a = win.add('statictext', undefined, 'Height: ');
-        win.txt_in_y = win.add('edittext', undefined, '');
-        win.txt_in_y.characters = 10;
-        
+        var label01a = p02g01.add('statictext', undefined, 'Width: ');
+        panel02.txt_in_x = p02g01.add('edittext', undefined, '');
+        panel02.txt_in_x.characters = 10;
+        var label01b = p02g01.add('statictext', undefined, 'Height: ');
+        panel02.txt_in_y = p02g01.add('edittext', undefined, '');
+        panel02.txt_in_y.characters = 10;
         //  apply Button
-        win.btnCompSet = win.add('button', undefined, 'Apply', {name: "compSettings"});
+        panel02.btnCompSet = p02g01.add('button', undefined, 'Apply', {name: "compSettings"});
         
         // --- Action ---
-        // --- Action ---
-        // function triggerPrejmen() {
-        //     doMain(this.parent); // Calls doMain with the win object
-        // }
-        win.btnRename.onClick = function () {
-            doMain(this.parent); // Calls doMain with the win object
-            }
-        win.btnCompSet.onClick = function () {
-            doMain(this.parent); // Calls doMain with the win object
+        panel01.btnRename.onClick = function () {
+            doMain(this.parent.parent); // Calls doMain with the win object
+        }
+        panel02.btnCompSet.onClick = function () {
+            doMain(this.parent.parent); // Calls doMain with the win object
         }
         
         //  ================window================oo
@@ -119,159 +116,13 @@ var message = "";
         win instanceof Window
             ? (win.center(), win.show()) : (win.layout.layout(true), win.layout.resize());
     }
-    //========================callback========================
-    ///// 1- prejmenOvator
-    function prejmenOvator(item, theDialog) {
 
-        var oldString = theDialog.txt_in_search.text;
-        var newString = theDialog.txt_in_replace.text;
+    //========================function========================
 
-        var oldName = comp.name; // nome da item
-        var newName = oldName.replace(oldString, newString);
-            
-            comp.name = newName;
-        //  fixing broken expressions due to the change of the name;              
-        app.project.autoFixExpressions(oldName, newName);
-    }
-
-
-
-    //------------------------------------dimension
-    function makeParentLayerOfAllUnparented(theComp, newParent)
-    {
-        for (var i = 1; i <= theComp.numLayers; i++) {
-            var curLayer = theComp.layer(i);
-            if (curLayer.locked) {curLayer.locked = false;}
-            if (curLayer != newParent && curLayer.parent == null && curLayer.threeDLayer != true) {
-                curLayer.parent = newParent;
-            }
-        }
-    }
-    // parent = the 'null3DLayer' created for this re-centering
-    // axis = direction; 0 = x for witdh, 1 = y for height
-    // shift = how much to shift the null
-    function moveParent(parent, axis, shift) {
-        //null is at 000 anyway, so no math needed
-        newPos = [0, 0, 0];
-        newPos[axis] = shift;
-        parent.position.setValue(newPos);
-    }
-    ///// 2- width
-    // limit=30000
-    function width(item, theDialog) {
-    // if (theDialog.txt_in_x.text != "") {
-        if (isNaN(parseInt(theDialog.txt_in_x.text))) {
-            message = (message + "Not a number value for Width\r");
-            theDialog.txt_in_x.text = ""; //empty field if it is bad so we don't try anymore
-        } else {
-            var oldWidth = item.width;
-            var newWidth = (parseInt(theDialog.txt_in_x.text));
-            if ( (newWidth > 30000) || (newWidth < 4) ) {
-                message = (message + "Value out of range for Width\r");
-                theDialog.txt_in_x.text = ""; //empty field if it is bad so we don't try anymore
-            } else {
-                if (oldWidth != newWidth) {
-                    item.width = newWidth;
-                    // message = (message + "Value is OK\r"); // test messagae
-                    // re-centering: na rozdil od CRG je stale zapnuty
-                    // if 'recenter' checkbox is checked:
-                    // if (theDialog.reCenterCheck.value) {
-                        thisMuch = (-1 * (oldWidth - newWidth)) / 2;
-                        null3DLayer = item.layers.addNull();
-                        null3DLayer.threeDLayer = true;
-                        doomedNullSrc = null3DLayer.source; // null project item, so that it could be removed
-                        null3DLayer.position.setValue([0, 0, 0]);
-                        // Set null3DLayer as parent of all layers that don't have parents.  
-                            makeParentLayerOfAllUnparented(item, null3DLayer);
-                            //null, axis, amt
-                            moveParent(null3DLayer, 0, thisMuch);
-                        null3DLayer.remove();
-                        doomedNullSrc.remove();
-                        // }
-                    }
-                }
-        }
-    }
-    ///// 3- height
-    // limit=30000
-    function height(item, theDialog) {
-        // if (theDialog.txt_in_y.text != "") {
-            if (isNaN(parseInt(theDialog.txt_in_y.text))) {
-                message = (message + "Not a number value for Height\r");
-                theDialog.txt_in_y.text = ""; //empty field if it is bad so we don't try anymore
-            } else {
-                var oldHeight = item.height;
-                var newHeigh = (parseInt(theDialog.txt_in_y.text));
-                if ( (newHeigh > 30000) || (newHeigh < 4) ) {
-                    message = (message + "Value out of range for Heigh\r");
-                    theDialog.txt_in_y.text = ""; //empty field if it is bad so we don't try anymore
-                } else {
-                    if (oldHeight != newHeigh) {
-                        item.height = newHeigh;
-                        // message = (message + "Value is OK\r"); // test messagae
-                        // if 'recenter' checkbox is checked:
-                        // if (theDialog.reCenterCheck.value) {
-                            thisMuch = (-1 * (oldHeight - newHeigh)) / 2;
-                            null3DLayer = item.layers.addNull();
-                            null3DLayer.threeDLayer = true;
-                            doomedNullSrc = null3DLayer.source; // null project item, so that it could be removed
-                            null3DLayer.position.setValue([0, 0, 0]);
-                            // Set null3DLayer as parent of all layers that don't have parents.  
-                            makeParentLayerOfAllUnparented(item, null3DLayer);
-                            //null, axis, amt
-                            moveParent(null3DLayer, 1, thisMuch);
-                            null3DLayer.remove();
-                            doomedNullSrc.remove();
-                            // }
-                        }
-                    }
-            }
-        }
-    //------------------------------------
-    // calling the loop
     
-    
-    //  implementing the particular functions for selected comps
-    // function processLoop(array, theDialog) {
-    // for (var index = 0; index < array.length; index++) {
-    //     var element = array[index];
-        
-        
-    //     if (element instanceof CompItem) {  //  zbytek pracuje jen na comps
-    //         if (theDialog.txt_in_search.text != "") {
-    //             prejmenOvator(element, theDialog);
-    //         }
-    //         if (theDialog.txt_in_x.text != "") {
-    //             width(element, theDialog);
-    //         }
-    //         if (theDialog.txt_in_y.text != "") {
-    //             height(element, theDialog);
-    //             }
-    //         if (message != "") {
-    //             alert("The following problems were found (these settings were not changed!):\r" + message);
-    //             }
-    //         }
-    //     // } else {
-    //     //     callback(element, input1, input2);  // prejmenovator neni omezen
-    //     // }
-    //     }
-    // }
-
-    // function processIntro(theDialog) {
-    // // var undoTitle = "Change " + callback.name;
-    // // app.beginUndoGroup(undoTitle);
-    // var selection = app.project.selection; // compositions
-
-    //     if (selection.length == 0) {
-    //         alert("Select a composition");
-    //     } else {
-    //         processLoop(selection, theDialog);
-    //     }
-    // // app.endUndoGroup();
-    // }
     
     function doMain(theDialog) {
-    app.beginUndoGroup("Change Selected Comps");
+        app.beginUndoGroup("Change Selected Comps");
         
         var selection = app.project.selection; // compositions
 
@@ -399,7 +250,7 @@ var message = "";
         }
     }   
 
-    app.endUndoGroup();
+        app.endUndoGroup();
     }
 
 })(this);
