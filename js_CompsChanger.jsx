@@ -50,10 +50,11 @@ v03f    Solution: doMain(panel01, panel02); // Worked. The functions are separat
 v03g    Prejmenovator: EventListener added to 'replace with' and 'Apply' button.
 v03h    Prejmenovator: 3-way: Search&Replace, Append, Remove.
 v03i    Complete: Duration, FPS, Start, Duration including subComps.
+v03j    Reset input fields & unclick duration checkbox.
 */
 
 //===========globals
-var vers = '03i';
+var vers = '03j';
 var title = 'compsChanger (v' + vers + ')';
 var message = "";
 //==================
@@ -247,6 +248,16 @@ var message = "";
                     }
                 }
             }
+            //  reset input fields & unclick duration checkbox
+            panel01.txt_in_search.text = "";
+            panel01.txt_in_replace.text = "";
+            panel02.txt_in_x.text = "";
+            panel02.txt_in_y.text = "";
+            panel02.txt_in_fps.text = "";
+            panel02.txt_in_start.text = "";
+            panel02.txt_in_dur.text = "";
+            panel02.durChkBx.value = false;
+            message = "";
         }   
 
         app.endUndoGroup();
