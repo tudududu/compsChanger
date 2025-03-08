@@ -52,6 +52,7 @@ v03h    Prejmenovator: 3-way: Search&Replace, Append, Remove.
 v03i    Complete: Duration, FPS, Start, Duration including subComps.
 v03j    Reset input fields & unclick duration checkbox.
 v03k    Reset input fields except Prejmenovator.
+v03l    Prejmenovator: Case convertor. Radio buttons in 1 row.
 */
 
 //===========globals
@@ -87,10 +88,13 @@ var message = "";
             p01g01.orientation = 'column';
             p01g01.alignChildren = 'fill';
         //  input text
-        panel01.label_01 = p01g01.add('statictext', undefined, 'Search for:');
+        panel01.label_01 = p01g01.add('statictext', undefined, 'Search:');
         panel01.txt_in_search = p01g01.add('edittext', undefined, '');
         panel01.txt_in_search.characters = 25;
-        panel01.label_02 = p01g01.add('statictext', undefined, 'Replace with:');
+        panel01.label_02 = p01g01.add('statictext', undefined, 'Replace:');
+        // Add checkbox
+        // panel01.chkBox_01 = p01g01.add('checkbox', undefined, 'Capitalize');
+        // panel01.chkBox_01.value = false;
         panel01.txt_in_replace = p01g01.add('edittext', undefined, '');
         panel01.txt_in_replace.characters = 25;
 
@@ -109,6 +113,7 @@ var message = "";
                 doTextChange(panel01.btnRename, 'Search and replace');
                 doTextChange(panel01.label_01, 'Search for:');
                 doTextChange(panel01.label_02, 'Replace with:');
+                panel01.txt_in_replace.visible = true; // Show the replace field
             };
         panel01.appRad = p01g02.add('radiobutton', undefined, 'Append');
             panel01.appRad.alignChildren = 'fill';
@@ -116,6 +121,7 @@ var message = "";
                 doTextChange(panel01.btnRename, 'Append');
                 doTextChange(panel01.label_01, 'Append head:');
                 doTextChange(panel01.label_02, 'Append tail:');
+                panel01.txt_in_replace.visible = true; // Show the replace field
             };
         panel01.remRad = p01g02.add('radiobutton', undefined, 'Remove');
             panel01.remRad.alignChildren = 'fill';
@@ -123,6 +129,16 @@ var message = "";
                 doTextChange(panel01.btnRename, 'Remove');
                 doTextChange(panel01.label_01, 'Remove from head (number):');
                 doTextChange(panel01.label_02, 'Remove from tail (number):');
+                panel01.txt_in_replace.visible = true; // Show the replace field
+            };
+        panel01.caseRad = p01g02.add('radiobutton', undefined, 'Case');
+            panel01.caseRad.alignChildren = 'fill';
+            panel01.caseRad.onClick = function () {
+                doTextChange(panel01.btnRename, 'Convert case');
+                doTextChange(panel01.label_01, 'Search for:');
+                doTextChange(panel01.label_02, 'Nothing here:');
+                panel01.label_02.visible = false; // Hide the replace field
+                panel01.txt_in_replace.visible = false; // Hide the replace field
             };
         
         //  ================panel02================oo
@@ -297,6 +313,9 @@ var message = "";
         }
     }
 
+    function capFirst(str) {
+     return str[0].toUpperCase() + str.slice(1).toLowerCase();
+    }
 
     function prejmenOvator(item, panel) {
         var oldString = panel.txt_in_search.text;
@@ -307,7 +326,21 @@ var message = "";
         
         if (panel.repRad.value) {
             newName = oldName.replace(oldString, newString);
-            // if ((parseFloat(app.version) < 9.0)) {newName=(newName.substr(0,31));}
+        } else if (panel.caseRad.value) {
+            newName = oldName
+                // .replace(oldString, capFirst(oldString));
+                // Capitalize the first letter of each word (applies to first match only)
+                .replace(oldString, oldString[0].toUpperCase() + oldString.slice(1).toLowerCase()) // Capitalize the first letter of each word
+                // Capitalize the first letter of each word (applies globally)
+                // .replace(new RegExp(oldString, 'g'), oldString[0].toUpperCase() + oldString.slice(1).toLowerCase()) // Capitalize the first letter of each word
+                // Insert space between lower case and capital letters
+                // .replace(/([a-z])([A-Z])/g, "$1 $2")
+                // Capitalize the first letter of the first word
+                // .replace(/^([a-z])/, "$1".toUpperCase())
+                // Capitalize the first letter of the last word
+                // .replace(/([A-Z])([a-z])$/, "$1 $2")
+                // .replace(/([A-Z])([A-Z][a-z])/g, "$1 $2") // Add space between capital letters followed by lowercase letter
+;
         } else if (panel.appRad.value) {
             newName = (oldString + oldName + newString);
         } else if (panel.remRad.value) {
