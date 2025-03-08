@@ -53,6 +53,7 @@ v03i    Complete: Duration, FPS, Start, Duration including subComps.
 v03j    Reset input fields & unclick duration checkbox.
 v03k    Reset input fields except Prejmenovator.
 v03l    Prejmenovator: Case convertor. Radio buttons in 1 row.
+v03m    Prejmenovator: Case convertor. Radio buttons in 2 rows.
 */
 
 //===========globals
@@ -79,11 +80,22 @@ var message = "";
             panel01.orientation = 'column';
             panel01.alignChildren = 'fill';
         var p01g02 = panel01.add("group", undefined, { name: "p01g02" });
-            p01g02.orientation = "row";
+            p01g02.orientation = "column"; // Change orientation to column
             p01g02.alignment = "fill";
             p01g02.alignChildren = ["fill", "center"];
             p01g02.spacing = 10;
             p01g02.margins = 0;
+        var p01g02_row1 = p01g02.add("group");
+            p01g02_row1.orientation = "row";
+            p01g02_row1.alignChildren = ["fill", "center"];
+            p01g02_row1.spacing = 10;
+            p01g02_row1.margins = 0;
+        var p01g02_row2 = p01g02.add("group");
+            p01g02_row2.orientation = "row";
+            p01g02_row2.alignChildren = ["fill", "center"];
+            p01g02_row2.spacing = 10;
+            p01g02_row2.margins = 0;
+
         var p01g01 = panel01.add('group');
             p01g01.orientation = 'column';
             p01g01.alignChildren = 'fill';
@@ -106,32 +118,44 @@ var message = "";
             target.text = newText;
         }
         //  radio buttons
-        panel01.repRad = p01g02.add('radiobutton', undefined, 'Search');
+        panel01.repRad = p01g02_row1.add('radiobutton', undefined, 'Search');
             panel01.repRad.alignChildren = 'fill';
             panel01.repRad.value = true;
             panel01.repRad.onClick = function () {
                 doTextChange(panel01.btnRename, 'Search and replace');
                 doTextChange(panel01.label_01, 'Search for:');
                 doTextChange(panel01.label_02, 'Replace with:');
+                panel01.label_02.visible = true;
                 panel01.txt_in_replace.visible = true; // Show the replace field
+                panel01.appRad.value = false;
+                panel01.remRad.value = false;
+                panel01.caseRad.value = false;
             };
-        panel01.appRad = p01g02.add('radiobutton', undefined, 'Append');
+        panel01.appRad = p01g02_row1.add('radiobutton', undefined, 'Append');
             panel01.appRad.alignChildren = 'fill';
             panel01.appRad.onClick = function () {
                 doTextChange(panel01.btnRename, 'Append');
                 doTextChange(panel01.label_01, 'Append head:');
                 doTextChange(panel01.label_02, 'Append tail:');
+                panel01.label_02.visible = true;
                 panel01.txt_in_replace.visible = true; // Show the replace field
+                panel01.repRad.value = false;
+                panel01.remRad.value = false;
+                panel01.caseRad.value = false;
             };
-        panel01.remRad = p01g02.add('radiobutton', undefined, 'Remove');
+        panel01.remRad = p01g02_row2.add('radiobutton', undefined, 'Remove');
             panel01.remRad.alignChildren = 'fill';
             panel01.remRad.onClick = function () {
                 doTextChange(panel01.btnRename, 'Remove');
                 doTextChange(panel01.label_01, 'Remove from head (number):');
                 doTextChange(panel01.label_02, 'Remove from tail (number):');
+                panel01.label_02.visible = true;
                 panel01.txt_in_replace.visible = true; // Show the replace field
+                panel01.repRad.value = false;
+                panel01.appRad.value = false;
+                panel01.caseRad.value = false;
             };
-        panel01.caseRad = p01g02.add('radiobutton', undefined, 'Case');
+        panel01.caseRad = p01g02_row2.add('radiobutton', undefined, 'Case');
             panel01.caseRad.alignChildren = 'fill';
             panel01.caseRad.onClick = function () {
                 doTextChange(panel01.btnRename, 'Convert case');
@@ -139,8 +163,11 @@ var message = "";
                 doTextChange(panel01.label_02, 'Nothing here:');
                 panel01.label_02.visible = false; // Hide the replace field
                 panel01.txt_in_replace.visible = false; // Hide the replace field
+                panel01.repRad.value = false;
+                panel01.appRad.value = false;
+                panel01.remRad.value = false;
             };
-        
+
         //  ================panel02================oo
         //  ================compSettings================oo
         var panel02 = win.add('panel', undefined, 'Dimension');
