@@ -54,6 +54,8 @@ v03j    Reset input fields & unclick duration checkbox.
 v03k    Reset input fields except Prejmenovator.
 v03l    Prejmenovator: Case convertor. Radio buttons in 1 row.
 v03m    Prejmenovator: Case convertor. Radio buttons in 2 rows.
+v03n    Prejmenovator: UI - Case convertor + Append -> to aligne.
+    v03o    Prejmenovator: remove limit to Comps only.
 */
 
 //===========globals
@@ -155,7 +157,7 @@ var message = "";
                 panel01.appRad.value = false;
                 panel01.caseRad.value = false;
             };
-        panel01.caseRad = p01g02_row2.add('radiobutton', undefined, 'Case');
+        panel01.caseRad = p01g02_row2.add('radiobutton', undefined, 'Capitalize');
             panel01.caseRad.alignChildren = 'fill';
             panel01.caseRad.onClick = function () {
                 doTextChange(panel01.btnRename, 'Convert case');
