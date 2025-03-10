@@ -55,7 +55,7 @@ v03k    Reset input fields except Prejmenovator.
 v03l    Prejmenovator: Case convertor. Radio buttons in 1 row.
 v03m    Prejmenovator: Case convertor. Radio buttons in 2 rows.
 v03n    Prejmenovator: UI - Case convertor + Append -> to aligne.
-    v03o    Prejmenovator: remove limit to Comps only.
+v03o    Prejmenovator: remove limit to Comps only.
 */
 
 //===========globals
@@ -267,10 +267,10 @@ var message = "";
             for (var index = 0; index < selection.length; index++) {
                 var item = selection[index];
                 
-                if (item instanceof CompItem) {  //  zbytek pracuje jen na comps
                     if (panel01.txt_in_search.text != "") {
                         prejmenOvator(item, panel01);
                     }
+                if (item instanceof CompItem) {  //  zbytek pracuje jen na comps
                     if (panel02.txt_in_x.text != "") {
                         width(item, panel02);
                     }
