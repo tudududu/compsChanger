@@ -68,7 +68,7 @@ v03p    Prejmenovator: Fix: Added 2nd condition enabling run if 1st or 2nd field
 */
 
 //===========globals
-var vers = '03k';
+var vers = '03p';
 var title = 'compsChanger (v' + vers + ')';
 var message = "";
 //==================
