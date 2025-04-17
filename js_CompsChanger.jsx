@@ -265,59 +265,6 @@ var message = "";
 
     //========================function========================
 
-    function doMain(panel01, panel02) {
-        app.beginUndoGroup("Change Selected Comps");
-        
-        var selection = app.project.selection; // compositions
-
-        if (selection.length == 0) {
-            alert("Select a composition");
-        } else {
-            for (var index = 0; index < selection.length; index++) {
-                var item = selection[index];
-                
-                    if (panel01.txt_in_search.text != "" || panel01.txt_in_replace != "") {
-                        prejmenOvator(item, panel01);
-                    }
-                if (item instanceof CompItem) {  //  zbytek pracuje jen na comps
-                    if (panel02.txt_in_x.text != "") {
-                        width(item, panel02);
-                    }
-                    if (panel02.txt_in_y.text != "") {
-                        height(item, panel02);
-                    }
-                    if (panel02.txt_in_start.text != "") {
-                        zkracovator(item, panel02);
-                    }
-                    if (panel02.txt_in_fps.text != "") {
-                        fps(item, panel02);
-                    }
-                    if (panel02.txt_in_dur.text != "" && panel02.durChkBx.value == false) {
-                        duration(item, panel02);
-                    }
-                    if (panel02.txt_in_dur.text != "" && panel02.durChkBx.value == true) {
-                        durationInDepht(item, panel02);
-                    }
-                    if (message != "") {
-                        alert("The following problems were found (these settings were not changed!):\r" + message);
-                    }
-                }
-            }
-            //  reset input fields & unclick duration checkbox
-            // panel01.txt_in_search.text = "";
-            // panel01.txt_in_replace.text = "";
-            panel02.txt_in_x.text = "";
-            panel02.txt_in_y.text = "";
-            panel02.txt_in_fps.text = "";
-            panel02.txt_in_start.text = "";
-            panel02.txt_in_dur.text = "";
-            panel02.durChkBx.value = false;
-            message = "";
-        }   
-
-        app.endUndoGroup();
-    }
-    
     //  work area IN
     function zkracovator(comp, panel) {
         var startTimeL = panel.txt_in_start.text;
@@ -556,5 +503,61 @@ var message = "";
     }
     }
 
+
+    //========================Main========================
+    function doMain(panel01, panel02) {
+        app.beginUndoGroup("Change Selected Comps");
+        
+        var selection = app.project.selection; // compositions
+
+        if (selection.length == 0) {
+            alert("Select a composition");
+        } else {
+            for (var index = 0; index < selection.length; index++) {
+                var item = selection[index];
+                
+                if (panel01.txt_in_search.text != "" || panel01.txt_in_replace != "") {
+                    prejmenOvator(item, panel01);
+                }
+                if (item instanceof CompItem) {  //  zbytek pracuje jen na comps
+                    if (panel02.txt_in_x.text != "") {
+                        width(item, panel02);
+                    }
+                    if (panel02.txt_in_y.text != "") {
+                        height(item, panel02);
+                    }
+                    if (panel02.txt_in_start.text != "") {
+                        zkracovator(item, panel02);
+                    }
+                    if (panel02.txt_in_fps.text != "") {
+                        fps(item, panel02);
+                    }
+                    if (panel02.txt_in_dur.text != "" && panel02.durChkBx.value == false) {
+                        duration(item, panel02);
+                    }
+                    if (panel02.txt_in_dur.text != "" && panel02.durChkBx.value == true) {
+                        durationInDepht(item, panel02);
+                    }
+                    if (message != "") {
+                        alert("The following problems were found (these settings were not changed!):\r" + message);
+                    }
+                }
+            }
+            //  reset input fields & unclick duration checkbox
+            // panel01.txt_in_search.text = "";
+            // panel01.txt_in_replace.text = "";
+            panel02.txt_in_x.text = "";
+            panel02.txt_in_y.text = "";
+            panel02.txt_in_fps.text = "";
+            panel02.txt_in_start.text = "";
+            panel02.txt_in_dur.text = "";
+            panel02.durChkBx.value = false;
+            message = "";
+        }   
+
+        app.endUndoGroup();
+    }
+    //========================Main========================
+    
 
 })(this);
