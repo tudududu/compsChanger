@@ -65,10 +65,11 @@ v03m    Prejmenovator: Case convertor. Radio buttons in 2 rows.
 v03n    Prejmenovator: UI - Case convertor + Append -> to aligne.
 v03o    Prejmenovator: Remove limit to Comps only.
 v03p    Prejmenovator: Fix: Added 2nd condition enabling run if 1st or 2nd field != "".
+v03q    Separated "OK" button of panel01 and panel 02. Function doMain divided into doMain_01 and doMain_02.
 */
 
 //===========globals
-var vers = '03p';
+var vers = '03q';
 var title = 'compsChanger (v' + vers + ')';
 var message = "";
 //==================
@@ -230,7 +231,7 @@ var message = "";
         function pressed(k) {
             if (k.keyName === "Enter") {
                 //alert("You pressed " + k.keyName);
-                doMain(panel01, panel02); // Pass both panels to doMain
+                doMain_01(panel01); // Pass both panels to doMain
             }
         }
         //  "Enter" na tlacitku spusti funkci
@@ -238,7 +239,7 @@ var message = "";
         function pressed_02(k) {
             if (k.keyName === "Enter") {
                 //alert("You pressed " + k.keyName);
-                doMain(panel01, panel02); // Pass both panels to doMain
+                doMain_01(panel01); // Pass both panels to doMain
             }
             /*if (k.keyName === "Tab") {
                 txt_in_search.active = true;
@@ -248,10 +249,10 @@ var message = "";
 
         // ================click================oo
         panel01.btnRename.onClick = function () {
-            doMain(panel01, panel02); // Pass both panels to doMain
+            doMain_01(panel01); // Pass panel01 to doMain_01
         }
         panel02.btnCompSet.onClick = function () {
-            doMain(panel01, panel02); // Pass both panels to doMain
+            doMain_02(panel02); // Pass panel02 to doMain_01
         }
         
         //  ================window================oo
@@ -505,7 +506,8 @@ var message = "";
 
 
     //========================Main========================
-    function doMain(panel01, panel02) {
+
+    function doMain_01(panel01) {
         app.beginUndoGroup("Change Selected Comps");
         
         var selection = app.project.selection; // compositions
@@ -519,6 +521,24 @@ var message = "";
                 if (panel01.txt_in_search.text != "" || panel01.txt_in_replace != "") {
                     prejmenOvator(item, panel01);
                 }
+            //  reset input fields & unclick duration checkbox
+            // panel01.txt_in_search.text = "";
+            // panel01.txt_in_replace.text = "";
+            }
+        }
+    }
+
+    function doMain_02(panel02) {
+        app.beginUndoGroup("Change Selected Comps");
+        
+        var selection = app.project.selection; // compositions
+
+        if (selection.length == 0) {
+            alert("Select a composition");
+        } else {
+            for (var index = 0; index < selection.length; index++) {
+                var item = selection[index];
+                
                 if (item instanceof CompItem) {  //  zbytek pracuje jen na comps
                     if (panel02.txt_in_x.text != "") {
                         width(item, panel02);
@@ -544,8 +564,6 @@ var message = "";
                 }
             }
             //  reset input fields & unclick duration checkbox
-            // panel01.txt_in_search.text = "";
-            // panel01.txt_in_replace.text = "";
             panel02.txt_in_x.text = "";
             panel02.txt_in_y.text = "";
             panel02.txt_in_fps.text = "";
