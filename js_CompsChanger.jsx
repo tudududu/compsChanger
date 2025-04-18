@@ -66,10 +66,11 @@ v03n    Prejmenovator: UI - Case convertor + Append -> to aligne.
 v03o    Prejmenovator: Remove limit to Comps only.
 v03p    Prejmenovator: Fix: Added 2nd condition enabling run if 1st or 2nd field != "".
 v03q    Separated "OK" button of panel01 and panel 02. Function doMain divided into doMain_01 and doMain_02.
+v03r    Prejmenovator: Case conversion radio buttons added. Capitalize, Upper, Lower.
 */
 
 //===========globals
-var vers = '03q';
+var vers = '03r';
 var title = 'compsChanger (v' + vers + ')';
 var message = "";
 //==================
@@ -147,7 +148,7 @@ var message = "";
         panel01.uppRad = p01g01_replaceRow.add('radiobutton', undefined, 'Upper');
         panel01.capRad.value = false;
         panel01.capRad.visible = false; // Start hidden
-        panel01.uppRad = p01g01_replaceRow.add('radiobutton', undefined, 'Lower');
+        panel01.lowRad = p01g01_replaceRow.add('radiobutton', undefined, 'Lower');
         panel01.capRad.value = false;
         panel01.capRad.visible = false; // Start hidden
 
@@ -179,7 +180,7 @@ var message = "";
                 panel01.remRad.value = false;
                 panel01.caseRad.value = false;
             };
-        panel01.appRad = p01g02_row1.add('radiobutton', undefined, 'Append     ');
+        panel01.appRad = p01g02_row1.add('radiobutton', undefined, 'Append');
             panel01.appRad.alignChildren = 'fill';
             panel01.appRad.onClick = function () {
                 doTextChange(panel01.btnRename, 'Append');
@@ -344,9 +345,6 @@ var message = "";
         }
     }
 
-    function capFirst(str) {
-     return str[0].toUpperCase() + str.slice(1).toLowerCase();
-    }
 
     function prejmenOvator(item, panel) {
         var oldString = panel.txt_in_search.text;
@@ -357,21 +355,6 @@ var message = "";
         
         if (panel.repRad.value) {
             newName = oldName.replace(oldString, newString);
-        } else if (panel.caseRad.value) {
-            newName = oldName
-                // .replace(oldString, capFirst(oldString));
-                // Capitalize the first letter of each word (applies to first match only)
-                .replace(oldString, oldString[0].toUpperCase() + oldString.slice(1).toLowerCase()) // Capitalize the first letter of each word
-                // Capitalize the first letter of each word (applies globally)
-                // .replace(new RegExp(oldString, 'g'), oldString[0].toUpperCase() + oldString.slice(1).toLowerCase()) // Capitalize the first letter of each word
-                // Insert space between lower case and capital letters
-                // .replace(/([a-z])([A-Z])/g, "$1 $2")
-                // Capitalize the first letter of the first word
-                // .replace(/^([a-z])/, "$1".toUpperCase())
-                // Capitalize the first letter of the last word
-                // .replace(/([A-Z])([a-z])$/, "$1 $2")
-                // .replace(/([A-Z])([A-Z][a-z])/g, "$1 $2") // Add space between capital letters followed by lowercase letter
-;
         } else if (panel.appRad.value) {
             newName = (oldString + oldName + newString);
         } else if (panel.remRad.value) {
@@ -387,6 +370,20 @@ var message = "";
                 newName = (newName.substr(0, newName.length - newString));
                 oldString = "";
                 newString = "";
+            }
+        } else if (panel.caseRad.value) {
+            if (panel.capRad.value) {
+                newName = oldName
+                // Capitalize the first letter of each word
+                .replace(oldString, oldString[0].toUpperCase() + oldString.slice(1).toLowerCase());
+            } else if (panel.uppRad.value) {
+            newName = oldName
+                // toUpperCase
+                .replace(oldString, oldString.toUpperCase());
+            } else if (panel.lowRad.value) {
+            newName = oldName
+                // toLowerCase
+                .replace(oldString, oldString.toLowerCase());
             }
         }
         //////////////////////
@@ -624,3 +621,22 @@ var message = "";
     
 
 })(this);
+
+
+
+
+    // function capFirst(str) {
+    //  return str[0].toUpperCase() + str.slice(1).toLowerCase();
+    // }
+    // .replace(oldString, capFirst(oldString));
+    // Capitalize the first letter of each word (applies to first match only)
+    // .replace(oldString, oldString[0].toUpperCase() + oldString.slice(1).toLowerCase()) // Capitalize the first letter of each word
+    // Capitalize the first letter of each word (applies globally)
+    // .replace(new RegExp(oldString, 'g'), oldString[0].toUpperCase() + oldString.slice(1).toLowerCase()) // Capitalize the first letter of each word
+    // Insert space between lower case and capital letters
+    // .replace(/([a-z])([A-Z])/g, "$1 $2")
+    // Capitalize the first letter of the first word
+    // .replace(/^([a-z])/, "$1".toUpperCase())
+    // Capitalize the first letter of the last word
+    // .replace(/([A-Z])([a-z])$/, "$1 $2")
+    // .replace(/([A-Z])([A-Z][a-z])/g, "$1 $2") // Add space between capital letters followed by lowercase letter
