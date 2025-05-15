@@ -66,7 +66,8 @@ v03n    Prejmenovator: UI - Case convertor + Append -> to aligne.
 v03o    Prejmenovator: Remove limit to Comps only.
 v03p    Prejmenovator: Fix: Added 2nd condition enabling run if 1st or 2nd field != "".
 v03q    Separated "OK" button of panel01 and panel 02. Function doMain divided into doMain_01 and doMain_02.
-v03r    Prejmenovator: Case conversion radio buttons added. Capitalize, Upper, Lower.
+v03p    Prejmenovator: Case conversion radio buttons added. Capitalize, Upper, Lower.
+v03r    Prejmenovator: Case conversion. Capitalize can recognize words separated by space, dash, or underscore.
 */
 
 //===========globals
@@ -373,9 +374,14 @@ var message = "";
             }
         } else if (panel.caseRad.value) {
             if (panel.capRad.value) {
-                newName = oldName
-                // Capitalize the first letter of each word
-                .replace(oldString, oldString[0].toUpperCase() + oldString.slice(1).toLowerCase());
+                // Capitalize the first letter of each word separated by space, dash, or underscore
+                var pattern = new RegExp(oldString, "g");
+                newName = oldName.replace(pattern, function(match) {
+                    // Split by space, dash, or underscore, capitalize each part, then join back
+                    return match.replace(/([^\s\-_]+)/g, function(word) {
+                        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+                    });
+                });
             } else if (panel.uppRad.value) {
             newName = oldName
                 // toUpperCase
