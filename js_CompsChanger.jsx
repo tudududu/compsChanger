@@ -68,6 +68,7 @@ v03p    Prejmenovator: Fix: Added 2nd condition enabling run if 1st or 2nd field
 v03q    Separated "OK" button of panel01 and panel 02. Function doMain divided into doMain_01 and doMain_02.
 v03p    Prejmenovator: Case conversion radio buttons added. Capitalize, Upper, Lower.
 v03r    Prejmenovator: Case conversion. Capitalize can recognize words separated by space, dash, or underscore.
+v03s    Prejmenovator: Case conversion. Search off checkboc added. Apply the change to the complete old name.
 */
 
 //===========globals
@@ -196,6 +197,10 @@ var message = "";
                 panel01.remRad.value = false;
                 panel01.caseRad.value = false;
             };
+
+        panel01.searchChkBx = p01g02_row1.add('checkbox', undefined, undefined);
+        panel01.searchChkBx.value = false;
+
         panel01.remRad = p01g02_row2.add('radiobutton', undefined, 'Remove');
             panel01.remRad.alignChildren = 'fill';
             panel01.remRad.onClick = function () {
@@ -348,11 +353,20 @@ var message = "";
 
 
     function prejmenOvator(item, panel) {
-        var oldString = panel.txt_in_search.text;
+
+        var oldString = "";
         var newString = panel.txt_in_replace.text;
 
         var oldName = item.name; // nome da item
         var newName = oldName;
+
+        if (!panel.searchChkBx.value) {
+            //  if checkbox is not checked, use the search field
+            oldString = panel.txt_in_search.text;
+        } else {
+            //  if checkbox is checked, use the item name
+            oldString = oldName;
+        }
         
         if (panel.repRad.value) {
             newName = oldName.replace(oldString, newString);
