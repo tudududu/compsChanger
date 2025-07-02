@@ -69,6 +69,7 @@ v03q    Separated "OK" button of panel01 and panel 02. Function doMain divided i
 v03p    Prejmenovator: Case conversion radio buttons added. Capitalize, Upper, Lower.
 v03r    Prejmenovator: Case conversion. Capitalize can recognize words separated by space, dash, or underscore.
 v03s    Prejmenovator: Case conversion. Search off checkboc added. Apply the change to the complete old name.
+v03t    Prejmenovator: Case conversion. Search off checkboc added. Limited to the Case conversion.
 */
 
 //===========globals
@@ -216,7 +217,7 @@ var message = "";
                 panel01.appRad.value = false;
                 panel01.caseRad.value = false;
             };
-        panel01.caseRad = p01g02_row2.add('radiobutton', undefined, 'Convert case');
+        panel01.caseRad = p01g02_row2.add('radiobutton', undefined, 'Case Conv');
             panel01.caseRad.alignChildren = 'fill';
             panel01.caseRad.onClick = function () {
                 doTextChange(panel01.btnRename, 'Convert case');
@@ -354,19 +355,11 @@ var message = "";
 
     function prejmenOvator(item, panel) {
 
-        var oldString = "";
+        var oldString = panel.txt_in_search.text;
         var newString = panel.txt_in_replace.text;
 
         var oldName = item.name; // nome da item
         var newName = oldName;
-
-        if (!panel.searchChkBx.value) {
-            //  if checkbox is not checked, use the search field
-            oldString = panel.txt_in_search.text;
-        } else {
-            //  if checkbox is checked, use the item name
-            oldString = oldName;
-        }
         
         if (panel.repRad.value) {
             newName = oldName.replace(oldString, newString);
@@ -387,6 +380,15 @@ var message = "";
                 newString = "";
             }
         } else if (panel.caseRad.value) {
+
+            if (!panel.searchChkBx.value) {
+                //  if checkbox is not checked, use the search field
+                oldString = panel.txt_in_search.text;
+            } else {
+                //  if checkbox is checked, use the item name
+                oldString = oldName;
+            }
+
             if (panel.capRad.value) {
                 // Capitalize the first letter of each word separated by space, dash, or underscore
                 var pattern = new RegExp(oldString, "g");
