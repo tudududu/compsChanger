@@ -69,11 +69,12 @@ v03q    Separated "OK" button of panel01 and panel 02. Function doMain divided i
 v03p    Prejmenovator: Case conversion radio buttons added. Capitalize, Upper, Lower.
 v03r    Prejmenovator: Case conversion. Capitalize can recognize words separated by space, dash, or underscore.
 v03s    Prejmenovator: Case conversion. Search off checkboc added. Apply the change to the complete old name.
-v03t    Prejmenovator: Case conversion. Search off checkboc added. Limited to the Case conversion.
+v03t    Prejmenovator: Case conversion. Search off checkboc added. Limited fnc to the Case conversion.
+v03u    Prejmenovator: Case conversion. Search off checkboc added. Limited fnc and visibility to the Case conversion.
 */
 
 //===========globals
-var vers = '03r';
+var vers = '03u';
 var title = 'compsChanger (v' + vers + ')';
 var message = "";
 //==================
@@ -129,14 +130,14 @@ var message = "";
         var p01g01_replaceCol = p01g01_replaceStack.add('group');
             p01g01_replaceCol.orientation = 'column';
             p01g01_replaceCol.alignChildren = 'fill';
-            p01g01_replaceCol.alignment = ['fill', 'top']; // <-- Add this line
+            p01g01_replaceCol.alignment = ['fill', 'top'];
             // p01g01_replaceCol.minimumSize.width = 150;     // <-- Or set a preferred width
 
         panel01.label_02 = p01g01_replaceCol.add('statictext', undefined, 'Replace:');
-            panel01.label_02.alignment = ['fill', 'top']; // <-- Add this line
+            panel01.label_02.alignment = ['fill', 'top'];
         panel01.txt_in_replace = p01g01_replaceCol.add('edittext', undefined, '');
             panel01.txt_in_replace.characters = 25;
-            panel01.txt_in_replace.alignment = ['fill', 'top']; // <-- Add this line
+            panel01.txt_in_replace.alignment = ['fill', 'top'];
 
 
         var p01g01_replaceRow = p01g01_replaceStack.add('group');
@@ -158,10 +159,6 @@ var message = "";
         //  apply Button
         panel01.btnRename = panel01.add('button', undefined, 'Search and replace', {name: "Prejmenovator"});
 
-        // Add checkbox
-        // panel01.chkBox_01 = p01g01.add('checkbox', undefined, 'Capitalize');
-        // panel01.chkBox_01.value = false;
-
         //  ================panel01=sub================oo
         function doTextChange(target, newText) {
             target.text = newText;
@@ -182,6 +179,7 @@ var message = "";
                 panel01.appRad.value = false;
                 panel01.remRad.value = false;
                 panel01.caseRad.value = false;
+                panel01.searchChkBx.visible = false;
             };
         panel01.appRad = p01g02_row1.add('radiobutton', undefined, 'Append');
             panel01.appRad.alignChildren = 'fill';
@@ -197,10 +195,8 @@ var message = "";
                 panel01.repRad.value = false;
                 panel01.remRad.value = false;
                 panel01.caseRad.value = false;
+                panel01.searchChkBx.visible = false;
             };
-
-        panel01.searchChkBx = p01g02_row1.add('checkbox', undefined, undefined);
-        panel01.searchChkBx.value = false;
 
         panel01.remRad = p01g02_row2.add('radiobutton', undefined, 'Remove');
             panel01.remRad.alignChildren = 'fill';
@@ -216,6 +212,7 @@ var message = "";
                 panel01.repRad.value = false;
                 panel01.appRad.value = false;
                 panel01.caseRad.value = false;
+                panel01.searchChkBx.visible = false;
             };
         panel01.caseRad = p01g02_row2.add('radiobutton', undefined, 'Case Conv');
             panel01.caseRad.alignChildren = 'fill';
@@ -231,7 +228,13 @@ var message = "";
                 panel01.repRad.value = false;
                 panel01.appRad.value = false;
                 panel01.remRad.value = false;
+                panel01.searchChkBx.visible = true;
             };
+
+        panel01.searchChkBx = p01g02_row2.add('checkbox', undefined, undefined);
+        panel01.searchChkBx.value = false;
+        panel01.searchChkBx.visible = false;
+
 
         //  ================panel02================oo
         //  ================compSettings================oo
